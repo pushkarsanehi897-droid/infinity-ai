@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFINITY STUDIOS | Intelligence for Viral Storytelling</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --accent: #818cf8;
+            --success: #10b981;
+            --bg: #030712; 
+            --sidebar-w: 280px;
+            --glass: rgba(15, 23, 42, 0.7);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg);
+            color: #f1f5f9; 
+            margin: 0;
+            display: flex; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- CINEMATIC BACKGROUND --- */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2; overflow: hidden; background: #020617;
+            pointer-events: none;
+        }
+        
+        .ambient-bg::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140%; height: 140%;
+            z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8' opacity='0.02'%3%3Cpath d='M18 7C16.3 7 14.8 7.7 13.8 8.8L12 10.8L10.2 8.8C9.2 7.7 7.7 7 6 7C2.7 7 0 9.7 0 13C0 16.3 2.7 19 6 19C7.7 19 9.2 18.3 10.2 17.2L12 15.2L13.8 17.2C14.8 18.3 16.3 19 18 19C21.3 19 24 16.3 24 13C24 9.7 21.3 7 18 7ZM6 17C3.8 17 2 15.2 2 13C2 10.8 3.8 9 6 9C7.1 9 8.1 9.5 8.8 10.2L11.5 13.2L8.8 16.2C8.1 16.9 7.1 17.4 6 17.4V17ZM18 17C16.9 17 15.9 16.5 15.2 15.8L12.5 12.8L15.2 9.8C15.9 9.1 16.9 8.6 18 8.6C20.2 8.6 22 10.4 22 12.6C22 14.8 20.2 16.6 18 16.6V17Z'/%3E%3C/svg%3E");
+            background-size: cover;
+            filter: blur(8px);
+        }
+
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35;
+            animation: float 20s infinite alternate ease-in-out;
+            z-index: -1;
+        }
+        .orb-1 { width: 600px; height: 600px; background: var(--primary); top: -150px; right: -150px; }
+        .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; left: -150px; }
+
+        @keyframes float {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(-60px, 60px) scale(1.1); }
+        }
+
+        #sidebar {
+            width: var(--sidebar-w);
+            background: rgba(8, 14, 28, 0.85);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 30px;
+            display: flex; flex-direction: column;
+            height: 100vh; position: fixed; left: 0; top: 0; z-index: 10;
+        }
+        #sidebar h2 { 
+            font-family: 'Syncopate', sans-serif; font-size: 0.75rem; 
+            color: var(--primary); margin-bottom: 25px; letter-spacing: 4px; 
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding-bottom: 12px;
+            text-transform: uppercase;
+        }
+        #historyList { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+
+        .history-item { 
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px; cursor: pointer; 
+            font-size: 0.8rem; margin-bottom: 12px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #94a3b8; border: 1px solid transparent;
+        }
+        .history-item:hover { 
+            background: rgba(56, 189, 248, 0.1); color: white; border-color: var(--primary);
+            transform: translateX(8px);
+        }
+
+        .main-wrapper {
+            margin-left: var(--sidebar-w); width: calc(100% - var(--sidebar-w));
+            display: flex; justify-content: center; padding: 60px 20px;
+        }
+        .container { 
+            background: var(--glass); backdrop-filter: blur(40px);
+            padding: 50px; border-radius: 35px; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            width: 100%; max-width: 850px; 
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        h1 { 
+            font-family: 'Syncopate', sans-serif; font-size: 2.5rem; font-weight: 700; margin: 0; 
+            background: linear-gradient(to right, #ffffff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+        .tagline { font-weight: 300; color: #64748b; margin-bottom: 40px; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;}
+
+        label { display: block; margin-top: 25px; font-size: 0.65rem; text-transform: uppercase; color: var(--primary); font-weight: 800; letter-spacing: 2.5px; }
+        
+        .input-row { display: flex; gap: 20px; }
+        select, input { 
+            width: 100%; padding: 18px; margin-top: 10px; border-radius: 18px; 
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6); 
+            color: white; outline: none; transition: 0.3s; font-family: inherit; font-size: 0.95rem;
+        }
+
+        .button-group { display: flex; gap: 15px; margin-top: 35px; }
+        button { 
+            flex: 1; padding: 20px; border-radius: 18px; border: none; 
+            font-size: 0.85rem; font-weight: 800; font-family: 'Syncopate', sans-serif;
+            cursor: pointer; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px;
+        }
+        
+        #genBtn { background: #ffffff; color: #020617; }
+        #imageBtn { background: rgba(99, 102, 241, 0.1); color: #fff; border: 1px solid #6366f1; }
+
+        #output { 
+            background: rgba(2, 6, 23, 0.4); padding: 35px; border-radius: 24px; 
+            margin-top: 35px; line-height: 1.8; color: #e2e8f0; white-space: pre-wrap; 
+            border-left: 5px solid var(--primary); font-size: 1.05rem;
+        }
+
+        #imageOutput {
+            margin-top: 40px; border-radius: 28px; overflow: hidden; display: none; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #genImage { width: 100%; height: auto; display: block; }
+
+        .loader-ring {
+            display: none; width: 60px; height: 60px; border: 4px solid rgba(56, 189, 248, 0.1);
+            border-left-color: var(--primary); border-radius: 50%;
+            animation: spin 1s infinite linear; margin: 40px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .signature { position: fixed; bottom: 30px; right: 40px; font-family: 'Syncopate', sans-serif; font-size: 0.65rem; color: #475569; letter-spacing: 3px; text-transform: uppercase; }
+        
+        #copyBtn { background: var(--success); color: white; margin-top: 25px; width: 100%; }
+        .clear-btn { background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 14px; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div id="sidebar">
+        <h2>Memory Bank</h2>
+        <div id="historyList"></div>
+        <button class="clear-btn" onclick="clearHistory()">WIPE STORAGE</button>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <h1>INFINITY STUDIOS</h1>
+            <div class="tagline">Neural Visual Storytelling</div>
+            
+            <div class="input-row">
+                <div style="flex:1">
+                    <label>Deployment Platform</label>
+                    <select id="platform">
+                        <option value="Instagram Reel">Instagram Reel</option>
+                        <option value="YouTube Short">YouTube Short</option>
+                        <option value="AI Image Prompt">AI Image Prompt</option>
+                        <option value="Event Wishes">Event Wishes</option>
+                        <option value="Facebook Reel">Facebook Reel</option>
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <label>Output Language</label>
+                    <select id="language">
+                        <option value="Hindi">Hindi (हिन्दी)</option>
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish (Español)</option>
+                        <option value="Japanese">Japanese (日本語)</option>
+                        <option value="Chinese">Chinese (中文)</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Core Concept</label>
+            <input type="text" id="topic" placeholder="Input your creative spark here...">
+            
+            <div class="button-group">
+                <button id="genBtn" onclick="generateScript()">Synthesize 🚀</button>
+                <button id="imageBtn" onclick="generateVisualConcept()">Visualize 🎨</button>
+            </div>
+
+            <div id="imageLoader" class="loader-ring"></div>
+            <div id="output">System ready for synthesis...</div>
+            
+            <div id="imageOutput">
+                <img id="genImage" src="">
+            </div>
+            
+            <button id="copyBtn" style="display:none;" onclick="copyScript()">Capture Output 📋</button>
+        </div>
+    </div>
+
+    <div class="signature">Emerged by Pushkar Sanehi</div>
+
+    <script>
+        // No Auth logic here - Direct Access Enabled
+        const State = { currentVisualDescription: "" };
+
+        window.onload = loadHistory;
+
+        async function generateScript() {
+            const topic = document.getElementById('topic').value;
+            const platform = document.getElementById('platform').value;
+            const language = document.getElementById('language').value;
+            const outputBox = document.getElementById('output');
+
+            if(!topic) return alert("Please input a concept!");
+
+            outputBox.innerHTML = "<i>Neural networks aligning...</i>";
+
+            try {
+                // Sent directly without Auth Tokens
+                const response = await fetch('http://localhost:5000/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, platform, language })
+                });
+                const data = await response.json();
+                outputBox.innerText = data.script;
+                document.getElementById('copyBtn').style.display = "block";
+                saveToHistory(topic, platform, language, data.script);
+            } catch (e) {
+                outputBox.innerText = "OFFLINE: Check if server.js is running.";
+            }
+        }
+
+        async function generateVisualConcept() {
+            const btn = document.getElementById('imageBtn');
+            const loader = document.getElementById('imageLoader');
+            btn.disabled = true;
+            loader.style.display = "block";
+
+            try {
+                const response = await fetch('http://localhost:5000/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visualDescription: document.getElementById('output').innerText })
+                });
+                const data = await response.json();
+                if(data.imageBase64) {
+                    document.getElementById('genImage').src = 'data:image/jpeg;base64,' + data.imageBase64;
+                    document.getElementById('imageOutput').style.display = "block";
+                }
+            } catch (e) {
+                alert("Visual core offline.");
+            } finally {
+                loader.style.display = "none";
+                btn.disabled = false;
+            }
+        }
+
+        function saveToHistory(topic, platform, language, script) {
+            let history = JSON.parse(localStorage.getItem('ifsHistory')) || [];
+            history.unshift({ topic, platform, script });
+            localStorage.setItem('ifsHistory', JSON.stringify(history.slice(0, 10)));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('ifsHistory')) || [];
+            list.innerHTML = "";
+            history.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "history-item";
+                div.innerHTML = `<strong>${item.topic}</strong>`;
+                div.onclick = () => { document.getElementById('output').innerText = item.script; };
+                list.appendChild(div);
+            });
+        }
+
+        function clearHistory() { localStorage.removeItem('ifsHistory'); loadHistory(); }
+
+        function copyScript() {
+            navigator.clipboard.writeText(document.getElementById('output').innerText);
+            alert("Captured!");
+        }
+    </script>
+</body>
+</html>
