@@ -228,7 +228,7 @@
 
             try {
                 // Sent directly without Auth Tokens
-                const response = await fetch('http://localhost:5000/generate', {
+                const response = await fetch('/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ topic, platform, language })
@@ -249,7 +249,7 @@
             loader.style.display = "block";
 
             try {
-                const response = await fetch('http://localhost:5000/generate-image', {
+                const response = await fetch('/generate-image', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ visualDescription: document.getElementById('output').innerText })
