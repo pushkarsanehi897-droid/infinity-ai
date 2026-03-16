@@ -36,7 +36,7 @@ app.post('/generate', async (req, res) => {
     const { topic, platform, language } = req.body;
     
     // Fallback model: Using the March 2026 stable version
-    const activeModel = "gemini-3.1-flash-lite-preview"; 
+    const activeModel = "gemini-1.5-flash";
 
     try {
         const result = await ai.models.generateContent({
