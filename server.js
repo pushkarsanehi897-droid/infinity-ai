@@ -21,7 +21,7 @@ app.use(express.json());
 
 // 4. SERVE FRONTEND (This makes your HTML/CSS live)
 // Make sure your index.html is in a folder named 'public' or 'frontend'
-app.use(express.static(path.join(__dirname, 'public'))); 
+app.use(express.static(__dirname));
 
 // API KEY VALIDATION
 if (!process.env.GEMINI_API_KEY) {
