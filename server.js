@@ -23,7 +23,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 app.post('/generate', async (req, res) => {
     try {
         const { topic, platform, language } = req.body;
-       const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
+       const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
         const prompt = `Act as an AI Creative Director. Create viral ${platform} content about ${topic} in ${language}. 1. HOOKS, 2. SCRIPT, 3. VISUAL DIRECTION.`;
         
