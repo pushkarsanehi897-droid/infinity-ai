@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
-import { GoogleGenAI } from '@google/generative-ai'; // FIXED THIS LINE
+import { GoogleGenerativeAI } from '@google/generative-ai'; // FIXED IMPORT
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// INITIALIZE AI
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+// INITIALIZE AI - FIXED NAME
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/generate', async (req, res) => {
     try {
