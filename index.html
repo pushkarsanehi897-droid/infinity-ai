@@ -25,6 +25,7 @@
             overflow: hidden;
         }
 
+        /* Animated Grid Background */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
@@ -32,7 +33,7 @@
             background-size: 50px 50px; z-index: -2;
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR SYSTEM */
         #sidebar {
             width: 260px;
             background: rgba(2, 6, 16, 0.98);
@@ -66,93 +67,158 @@
             transition: 0.3s;
         }
 
+        #toggle-btn:hover {
+            color: #000;
+            background: var(--accent-blue);
+            box-shadow: 0 0 20px var(--accent-blue);
+        }
+
+        /* LOGO DESIGN */
+        .ifs-logo {
+            position: absolute; top: 20px; right: 30px;
+            font-size: 45px; font-weight: bold;
+            filter: drop-shadow(0 0 15px var(--accent-red));
+        }
+        .infinity-symbol {
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         /* MAIN PANEL */
         #main-container {
             flex-grow: 1;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Changed to top-aligned for better scrolling */
+            align-items: center;
             padding: 40px;
-            overflow-y: auto; 
+            overflow-y: auto; /* Allows the whole page to scroll if the tab grows large */
         }
 
         #control-panel {
             background-color: var(--panel-bg);
             border: 1px solid rgba(0, 229, 255, 0.15);
             border-radius: 24px;
-            padding: 40px;
+            padding: 50px;
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
-            margin-top: 20px;
+            margin-top: 50px;
+            margin-bottom: 50px;
         }
 
+        /* Title Styling */
         h1 {
             margin: 0;
             letter-spacing: 8px;
             text-transform: uppercase;
             font-size: 30px;
+            font-weight: bold;
             background: linear-gradient(to right, var(--accent-blue), var(--accent-red), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+            animation: fire-pulse 4s infinite linear;
         }
 
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0; text-align: left; }
+        .subtitle {
+            font-size: 11px;
+            letter-spacing: 5px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        @keyframes fire-pulse {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(0, 229, 255, 0.5)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 20px rgba(255, 61, 0, 0.7)); }
+        }
+
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; text-align: left; }
         
         select, textarea {
             width: 100%; background: #0d1629;
             border: 1px solid rgba(0, 229, 255, 0.2);
             border-radius: 12px; color: #fff; padding: 14px;
-            box-sizing: border-box;
         }
 
-        textarea { height: 100px; grid-column: span 2; resize: none; }
+        textarea { height: 110px; grid-column: span 2; resize: none; }
 
+        /* THE GO INFINITY BUTTON */
         .primary-btn {
-            width: 100%; background: transparent; border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 15px; border-radius: 12px;
-            text-transform: uppercase; letter-spacing: 4px; cursor: pointer;
-            transition: 0.3s; font-weight: bold;
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 15px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .primary-btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px var(--accent-blue); }
+        .primary-btn:hover {
+            background: var(--accent-blue);
+            color: #000;
+            box-shadow: 0 0 25px var(--accent-blue);
+        }
 
-        /* DROP-DOWN OUTPUT SECTION */
+        /* UPDATED NEURAL OUTPUT SECTION: This now drops down and fills more space */
         #output-tab {
             margin-top: 20px; 
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(0, 229, 255, 0.2);
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 229, 255, 0.1);
             border-radius: 12px; 
-            padding: 25px; 
-            min-height: 150px;
-            max-height: 55vh; /* Drops down to cover more than half screen height if needed */
-            overflow-y: auto;
+            padding: 20px; 
+            min-height: 120px;
+            max-height: 50vh; /* Drops down to cover half the screen height */
+            overflow-y: auto; 
+            transition: all 0.5s ease-in-out; /* Smooth dropdown animation */
             text-align: left;
-            transition: all 0.4s ease;
         }
 
         #scriptOutput {
             font-family: 'Courier New', monospace; 
             color: #00e5ff; 
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
             white-space: pre-wrap;
         }
 
-        .copy-btn {
-            background: none; border: 1px solid rgba(0, 229, 255, 0.4);
-            color: var(--accent-blue); padding: 5px 15px; border-radius: 6px;
-            font-size: 10px; letter-spacing: 2px; cursor: pointer;
-            float: right; margin-bottom: 10px;
-        }
-
-        /* Scrollbar Styling */
-        #output-tab::-webkit-scrollbar { width: 6px; }
+        /* Neon Scrollbar */
+        #output-tab::-webkit-scrollbar { width: 8px; }
+        #output-tab::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
         #output-tab::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
 
-        .creator-tag { position: fixed; bottom: 20px; right: 20px; font-size: 9px; color: rgba(255, 255, 255, 0.2); }
+        /* Copy Button */
+        .copy-btn {
+            background: none;
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            color: var(--accent-blue);
+            padding: 5px 15px;
+            border-radius: 6px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            float: right;
+            margin-bottom: 10px;
+        }
+
+        .copy-btn:hover { background: var(--accent-blue); color: #000; }
+
+        .creator-tag {
+            position: fixed; bottom: 20px; right: 20px;
+            font-size: 9px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -160,13 +226,15 @@
         <button id="toggle-btn">ARCHIVE</button>
         <div style="color: var(--accent-blue); letter-spacing: 3px; font-size: 12px; margin-bottom: 20px;">NEURAL MEMORY</div>
         <div id="historyList" style="flex-grow:1; overflow-y:auto;"></div>
-        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:rgba(255,0,0,0.2); cursor:pointer; font-size:9px; margin-top:10px;">PURGE CACHE</button>
+        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:rgba(255,0,0,0.4); cursor:pointer; font-size:9px;">WIPE CACHE</button>
     </div>
 
     <div id="main-container">
+        <div class="ifs-logo"><span class="infinity-symbol">∞</span></div>
+
         <div id="control-panel">
             <h1>Infinity Studios</h1>
-            <div class="subtitle" style="font-size: 10px; letter-spacing: 4px; color: var(--text-sub);">INTELLIGENT FLOW SYSTEM</div>
+            <div class="subtitle">Intelligent Flow System</div>
             
             <div class="grid-layout">
                 <select id="platformSelect">
@@ -174,63 +242,66 @@
                     <option value="Facebook Reel">Facebook Reel</option>
                     <option value="YouTube Short">YouTube Short</option>
                     <option value="YouTube Long Video">YouTube Long Video</option>
+                    <option value="Homework Help">Homework Help</option>
                 </select>
                 
                 <select id="languageSelect">
                     <option value="Hindi">Hindi (हिंदी)</option>
                     <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="Japanese">Japanese</option>
                 </select>
 
-                <textarea id="topicInput" placeholder="Enter your core concept..."></textarea>
+                <textarea id="topicInput" placeholder="Commence your Infinite Possibilities..."></textarea>
             </div>
 
-            <button class="primary-btn" id="synthesize-btn">GO INFINITY ∞</button>
+            <button class="primary-btn" id="synthesize-btn">
+                Go Infinity <span class="infinity-symbol" style="font-size: 22px;">∞</span>
+            </button>
 
-            <div style="margin-top: 35px; text-align: left;">
-                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue);">NEURAL OUTPUT</label>
-                <button class="copy-btn" id="copy-btn">COPY SCRIPT</button>
+            <div id="neural-section" style="text-align: left;">
+                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); display: inline-block; margin-top: 30px;">NEURAL OUTPUT</label>
+                <button class="copy-btn" id="copy-btn">Copy Script</button>
                 <div id="output-tab">
-                    <div id="scriptOutput">Awaiting initialization...</div>
+                    <div id="scriptOutput">Welcome to Infinity studio made by Pushkar Sanehi</div>
                 </div>
             </div>
         </div>
+
         <div class="creator-tag">EMERGED BY PUSHKAR SANEHI</div>
     </div>
 
     <script>
         const sidebar = document.getElementById('sidebar');
-        document.getElementById('toggle-btn').addEventListener('click', () => sidebar.classList.toggle('closed'));
+        document.getElementById('toggle-btn').addEventListener('click', () => {
+            sidebar.classList.toggle('closed');
+        });
 
-        function saveHistory(topic, script, platform, language) {
+        const historyList = document.getElementById('historyList');
+        function saveHistory(topic, script) {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            h.unshift({ topic, script, platform, language });
-            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 15)));
+            h.unshift({ topic, script });
+            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 10)));
             renderH();
         }
-
         function renderH() {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            document.getElementById('historyList').innerHTML = h.map((item, i) => 
-                `<div onclick="loadH(${i})" style="padding:12px; border-bottom:1px solid rgba(0,229,255,0.1); font-size:11px; cursor:pointer; color:var(--text-sub);">${item.topic.substring(0,25)}...</div>`
-            ).join('');
+            historyList.innerHTML = h.map((item, i) => `<div onclick="loadH(${i})" style="padding:10px; border-bottom:1px solid #111; font-size:11px; cursor:pointer;">${item.topic.substring(0,20)}...</div>`).join('');
         }
-
-        // LOAD HISTORY NOW UPDATES PROMPT AND SETTINGS
         window.loadH = (i) => {
             const h = JSON.parse(localStorage.getItem('ifs_h'));
-            const data = h[i];
-            document.getElementById('topicInput').value = data.topic;
-            document.getElementById('platformSelect').value = data.platform;
-            document.getElementById('languageSelect').value = data.language;
-            document.getElementById('scriptOutput').innerText = data.script;
+            document.getElementById('scriptOutput').innerText = h[i].script;
         };
+        renderH();
 
+        // Copy Function
         document.getElementById('copy-btn').addEventListener('click', () => {
             const text = document.getElementById('scriptOutput').innerText;
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('copy-btn');
+                const originalText = btn.innerText;
                 btn.innerText = "COPIED!";
-                setTimeout(() => btn.innerText = "COPY SCRIPT", 2000);
+                setTimeout(() => { btn.innerText = originalText; }, 2000);
             });
         });
 
@@ -240,7 +311,7 @@
             const language = document.getElementById('languageSelect').value;
             if (!topic) return;
 
-            document.getElementById('scriptOutput').innerText = "GENERATING RESPONSE...";
+            document.getElementById('scriptOutput').innerText = "INITIATING FLOW...";
 
             try {
                 const res = await fetch('https://infinity-ai-1.onrender.com/generate', { 
@@ -249,15 +320,16 @@
                     body: JSON.stringify({ topic, platform, language }),
                 });
                 const data = await res.json();
+                
+                // Clean the output (No # or *)
                 const cleanText = data.script.replace(/[*#]/g, '');
+
                 document.getElementById('scriptOutput').innerText = cleanText;
-                saveHistory(topic, cleanText, platform, language);
+                saveHistory(topic, cleanText);
             } catch (e) {
-                document.getElementById('scriptOutput').innerText = "CONNECTION ERROR.";
+                document.getElementById('scriptOutput').innerText = "LINK FAILURE.";
             }
         });
-
-        renderH();
     </script>
 </body>
 </html>
