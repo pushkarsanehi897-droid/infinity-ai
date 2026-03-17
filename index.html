@@ -49,7 +49,6 @@
 
         #sidebar.closed { transform: translateX(-260px); }
 
-        /* ABSTRACT TOGGLE BUTTON */
         #toggle-btn {
             position: absolute;
             right: -65px;
@@ -74,7 +73,7 @@
             box-shadow: 0 0 20px var(--accent-blue);
         }
 
-        /* Brand & Logo Elements */
+        /* LOGO DESIGN */
         .ifs-logo {
             position: absolute; top: 20px; right: 30px;
             font-size: 45px; font-weight: bold;
@@ -82,7 +81,8 @@
         }
         .infinity-symbol {
             background: linear-gradient(45deg, var(--accent-blue), var(--accent-red));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* MAIN PANEL */
@@ -119,7 +119,6 @@
             animation: fire-pulse 4s infinite linear;
         }
 
-        /* Subtitle Styling */
         .subtitle {
             font-size: 11px;
             letter-spacing: 5px;
@@ -127,9 +126,6 @@
             text-transform: uppercase;
             margin-top: 5px;
             font-weight: 300;
-            background: linear-gradient(to right, #ffffff, var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         @keyframes fire-pulse {
@@ -147,15 +143,41 @@
 
         textarea { height: 110px; grid-column: span 2; resize: none; }
 
+        /* THE GO INFINITY BUTTON */
         .primary-btn {
-            width: 100%; background: transparent; border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 15px; border-radius: 12px;
-            text-transform: uppercase; letter-spacing: 3px; cursor: pointer; transition: 0.3s;
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 15px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .primary-btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 20px var(--accent-blue); }
+        .primary-btn:hover {
+            background: var(--accent-blue);
+            color: #000;
+            box-shadow: 0 0 25px var(--accent-blue);
+        }
 
-        /* Output Box */
+        .btn-infinity {
+            font-size: 20px;
+            background: linear-gradient(45deg, #000, #ff3d00);
+            -webkit-background-clip: text;
+            /* When hovering, we change the symbol color to black to match the text */
+        }
+        .primary-btn:hover .btn-infinity {
+            -webkit-text-fill-color: #000;
+        }
+
         #scriptOutput {
             margin-top: 20px; background: rgba(0,0,0,0.3);
             border: 1px solid rgba(0, 229, 255, 0.1);
@@ -204,7 +226,9 @@
                 <textarea id="topicInput" placeholder="Input core concept..."></textarea>
             </div>
 
-            <button class="primary-btn" id="synthesize-btn">Synthesize 🚀</button>
+            <button class="primary-btn" id="synthesize-btn">
+                Go Infinity <span class="infinity-symbol" style="font-size: 22px;">∞</span>
+            </button>
 
             <div id="output-container" style="text-align: left;">
                 <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); display: block; margin-top: 30px;">NEURAL OUTPUT</label>
@@ -244,7 +268,7 @@
             const language = document.getElementById('languageSelect').value;
             if (!topic) return;
 
-            document.getElementById('scriptOutput').innerText = "SYNTHESIZING FLOW...";
+            document.getElementById('scriptOutput').innerText = "INITIATING FLOW...";
 
             try {
                 const res = await fetch('https://infinity-ai-1.onrender.com/generate', { 
