@@ -9,11 +9,10 @@
             --bg-dark: #020610;
             --panel-bg: rgba(13, 22, 41, 0.95);
             --accent-blue: #00e5ff;
-            --accent-purple: #9c27b0;
+            --accent-red: #ff3d00;
             --text-main: #ffffff;
             --text-sub: #b0bec5;
             --font-stack: 'SF Pro Display', sans-serif;
-            --glow-accent: 0 0 20px rgba(0, 229, 255, 0.4);
         }
 
         body {
@@ -26,36 +25,78 @@
             overflow: hidden;
         }
 
-        /* Animated Grid Background */
-        body::before {
-            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px; z-index: -2;
-        }
-
-        /* Sidebar */
+        /* --- TOGGLE SIDEBAR --- */
         #sidebar {
-            width: 240px;
-            background: rgba(2, 6, 16, 0.8);
+            width: 260px;
+            background: rgba(2, 6, 16, 0.95);
             border-right: 1px solid rgba(0, 229, 255, 0.1);
             display: flex;
             flex-direction: column;
-            padding: 30px 20px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+            position: absolute;
+            height: 100%;
+            z-index: 100;
         }
 
-        .sidebar-brand { font-size: 14px; letter-spacing: 3px; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 40px; }
-        .sidebar-link { font-size: 12px; color: var(--text-sub); padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; }
-        .sidebar-link:hover { color: var(--accent-blue); padding-left: 5px; }
+        #sidebar.closed { transform: translateX(-260px); }
 
-        /* Main Dashboard */
+        #toggle-btn {
+            position: absolute;
+            right: -40px;
+            top: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .history-list {
+            margin-top: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .history-item {
+            font-size: 11px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .history-item:hover { color: var(--accent-blue); background: rgba(0,229,255,0.05); }
+
+        /* --- LOGO AREA --- */
+        .ifs-logo {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-red));
+        }
+
+        .infinity-symbol {
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- MAIN PANEL --- */
         #main-container {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
-            position: relative;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
         }
 
         #control-panel {
@@ -64,116 +105,77 @@
             border-radius: 24px;
             padding: 50px;
             width: 100%;
-            max-width: 850px;
+            max-width: 800px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        h1 {
-            font-weight: 300; font-size: 32px; letter-spacing: 6px; margin: 0;
-            background: linear-gradient(to right, var(--accent-blue), #fff, var(--accent-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-        }
-
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 30px 0; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0; }
         
-        label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-blue); margin-bottom: 8px; display: block; }
-        
-        /* THE FIX: Dropdown Visibility */
-        select {
-            width: 100%; background: #0d1629; /* Solid dark background for options */
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            border-radius: 12px; color: #ffffff; padding: 14px;
-            font-size: 14px; cursor: pointer; appearance: none;
+        select, textarea {
+            width: 100%; background: #0d1629;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 12px; color: #fff; padding: 12px;
         }
 
-        select option {
-            background-color: #0d1629; /* Ensures text is visible on all browsers */
-            color: #ffffff;
-        }
+        textarea { height: 100px; grid-column: span 2; resize: none; }
 
-        textarea {
-            width: 100%; background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; color: #fff; padding: 14px;
-            font-size: 14px; height: 100px; grid-column: span 2; resize: none;
-        }
-
-        /* Buttons */
         .primary-btn {
             width: 100%; background: transparent; border: 1px solid var(--accent-blue);
             color: var(--accent-blue); padding: 15px; border-radius: 12px;
-            text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 2px; cursor: pointer;
         }
-        .primary-btn:hover { background: var(--accent-blue); color: #000; box-shadow: var(--glow-accent); }
 
-        /* Output Terminal */
         #scriptOutput {
             margin-top: 20px; background: rgba(0,0,0,0.3);
             border: 1px solid rgba(0, 229, 255, 0.1);
             border-radius: 12px; padding: 20px; min-height: 120px;
-            max-height: 250px; overflow-y: auto;
-            font-family: 'Courier New', monospace; color: #00e5ff; font-size: 13px;
-            line-height: 1.6;
+            font-family: monospace; color: #00e5ff; font-size: 13px;
         }
 
-        /* THE CREATOR TAG: Bottom Right */
         .creator-tag {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 9px;
-            letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.3);
+            position: absolute; bottom: 20px; right: 20px;
+            font-size: 9px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.3);
             text-transform: uppercase;
         }
     </style>
 </head>
 <body>
     <div id="sidebar">
-        <div class="sidebar-brand">Infinity AI</div>
-        <div class="sidebar-link">Dashboard</div>
-        <div class="sidebar-link">Neural Memory</div>
-        <div class="sidebar-link">API Settings</div>
+        <button id="toggle-btn">M</button>
+        <div class="sidebar-brand" style="color: var(--accent-blue); letter-spacing: 2px; font-size: 14px;">NEURAL MEMORY</div>
+        <div class="history-list" id="historyList">
+            </div>
+        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:red; cursor:pointer; font-size:10px;">PURGE ALL</button>
     </div>
 
     <div id="main-container">
+        <div class="ifs-logo">
+            <span class="infinity-symbol">∞</span>
+        </div>
+
         <div id="control-panel">
-            <h1>Infinity Studios</h1>
-            <p style="font-size: 10px; letter-spacing: 3px; color: var(--text-sub); text-transform: uppercase; margin-top: 5px;">Neural Content Synthesis</p>
+            <h1 style="letter-spacing: 6px; text-transform: uppercase;">Infinity Studios</h1>
+            <p style="font-size: 10px; letter-spacing: 3px; color: var(--text-sub); margin-bottom: 30px;">NEURAL CONTENT SYNTHESIS</p>
             
             <div class="grid-layout">
-                <div class="input-group">
-                    <label>Deployment Platform</label>
-                    <select id="platformSelect">
-                        <option value="Instagram Reel">Instagram Reel</option>
-                        <option value="Facebook Reel">Facebook Reel</option>
-                        <option value="YouTube Short">YouTube Short</option>
-                        <option value="YouTube Long Video">YouTube Long Video</option>
-                        <option value="Homework Help">Homework Help</option>
-                    </select>
-                </div>
+                <select id="platformSelect">
+                    <option value="Instagram Reel">Instagram Reel</option>
+                    <option value="YouTube Short">YouTube Short</option>
+                    <option value="Homework Help">Homework Help</option>
+                </select>
                 
-                <div class="input-group">
-                    <label>Output Language</label>
-                    <select id="languageSelect">
-                        <option value="Hindi">Hindi (हिंदी)</option>
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="Japanese">Japanese</option>
-                        <option value="Chinese">Chinese</option>
-                        <option value="Korean">Korean</option>
-                    </select>
-                </div>
+                <select id="languageSelect">
+                    <option value="Hindi">Hindi (हिंदी)</option>
+                    <option value="English">English</option>
+                </select>
 
-                <textarea id="topicInput" placeholder="Enter your core concept or question..."></textarea>
+                <textarea id="topicInput" placeholder="Enter topic..."></textarea>
             </div>
 
             <button class="primary-btn" id="synthesize-btn">Synthesize 🚀</button>
 
             <div id="output-container">
-                <label style="margin-top: 25px;">Neural Output</label>
-                <div id="scriptOutput">System ready.</div>
+                <div id="scriptOutput">System online.</div>
             </div>
         </div>
 
@@ -181,14 +183,47 @@
     </div>
 
     <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('toggle-btn').addEventListener('click', () => {
+            sidebar.classList.toggle('closed');
+        });
+
+        // History Logic
+        const historyList = document.getElementById('historyList');
+        function saveToHistory(topic, script) {
+            const history = JSON.parse(localStorage.getItem('ifs_history') || '[]');
+            history.unshift({ topic, script, date: new Date().toLocaleTimeString() });
+            localStorage.setItem('ifs_history', JSON.stringify(history.slice(0, 10)));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('ifs_history') || '[]');
+            historyList.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="showHistory(${index})">
+                    <strong>${item.topic.substring(0, 20)}...</strong><br>
+                    <small>${item.date}</small>
+                </div>
+            `).join('');
+        }
+
+        window.showHistory = (index) => {
+            const history = JSON.parse(localStorage.getItem('ifs_history'));
+            document.getElementById('scriptOutput').innerText = history[index].script;
+        };
+
+        renderHistory();
+
+        // Synthesis Logic
         document.getElementById('synthesize-btn').addEventListener('click', async () => {
             const topic = document.getElementById('topicInput').value;
             const platform = document.getElementById('platformSelect').value;
             const language = document.getElementById('languageSelect').value;
             const scriptOutput = document.getElementById('scriptOutput');
 
-            if (!topic) { alert("Input required."); return; }
-            scriptOutput.innerText = "Processing...";
+            if (!topic) return;
+            scriptOutput.innerText = "Analyzing Neural Pathways...";
 
             try {
                 const response = await fetch('https://infinity-ai-1.onrender.com/generate', { 
@@ -198,8 +233,9 @@
                 });
                 const data = await response.json();
                 scriptOutput.innerText = data.script;
+                saveToHistory(topic, data.script);
             } catch (error) {
-                scriptOutput.innerText = "Connection Error.";
+                scriptOutput.innerText = "Connection Failed.";
             }
         });
     </script>
