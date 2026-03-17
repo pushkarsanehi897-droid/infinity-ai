@@ -33,6 +33,7 @@
             background: rgba(1, 4, 9, 0.98);
             z-index: 2000; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(20px);
+            transition: opacity 0.5s ease;
         }
         .auth-card {
             background: var(--cinematic-gradient);
@@ -44,8 +45,11 @@
         .auth-input {
             width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 229, 255, 0.3);
             color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px;
-            font-family: inherit; box-sizing: border-box;
+            font-family: inherit; box-sizing: border-box; outline: none;
+            transition: 0.3s;
         }
+        .auth-input:focus { border-color: var(--accent-orange); box-shadow: 0 0 15px rgba(255, 61, 0, 0.2); }
+
         .auth-btn {
             width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
@@ -375,19 +379,39 @@
 <body>
 
     <div id="auth-overlay">
-        <div class="auth-card">
+        <div class="auth-card" id="phone-card">
             <div class="infinity-symbol" style="font-size: 50px; margin-bottom: 15px;">∞</div>
             <h2 style="letter-spacing: 5px; font-size: 18px;">SECURE ACCESS</h2>
             <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 25px; letter-spacing: 1px;">Join the Neural Network to start creating.</p>
             
-            <input type="tel" id="userPhone" class="auth-input" placeholder="+91 Phone Number">
+            <input type="tel" id="userPhone" class="auth-input" placeholder="+91 Phone Number" maxlength="10">
             
-            <button class="auth-btn google-btn" onclick="handleAuth('Google')">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18"> Continue with Google
+            <button class="primary-btn" style="padding: 15px; font-size: 12px; margin-bottom: 15px;" onclick="requestOTP()">
+                GET NEURAL CODE
             </button>
-            <button class="auth-btn ms-btn" onclick="handleAuth('Microsoft')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="18"> Microsoft Account
+
+            <div style="display: flex; gap: 10px;">
+                <button class="auth-btn google-btn" style="font-size: 10px;" onclick="handleSocialAuth('Google')">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="14"> Google
+                </button>
+                <button class="auth-btn ms-btn" style="font-size: 10px;" onclick="handleSocialAuth('Microsoft')">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="14"> Microsoft
+                </button>
+            </div>
+        </div>
+
+        <div class="auth-card" id="otp-card" style="display: none;">
+            <div class="infinity-symbol" style="font-size: 50px; margin-bottom: 15px;">∞</div>
+            <h2 style="letter-spacing: 5px; font-size: 18px;">VERIFY LINK</h2>
+            <p id="otp-status" style="font-size: 11px; color: var(--text-sub); margin-bottom: 25px; letter-spacing: 1px;"></p>
+            
+            <input type="text" id="otpInput" class="auth-input" placeholder="000000" maxlength="6" style="text-align: center; letter-spacing: 12px; font-size: 22px;">
+            
+            <button class="primary-btn" style="padding: 15px; font-size: 12px;" onclick="verifyOTP()">
+                VALIDATE FLOW
             </button>
+            
+            <p onclick="location.reload()" style="font-size: 9px; color: var(--accent-orange); cursor: pointer; margin-top: 20px; letter-spacing: 2px;">BACK TO PHONE</p>
         </div>
     </div>
 
@@ -468,25 +492,55 @@
     </div>
 
     <script>
-        /* --- NEW: AUTHENTICATION LOGIC --- */
+        /* --- UPDATED: OTP & AUTH LOGIC --- */
         window.onload = function() {
             if (localStorage.getItem('ifs_user_auth')) {
                 document.getElementById('auth-overlay').style.display = 'none';
             }
         };
 
-        function handleAuth(provider) {
+        function requestOTP() {
             const phone = document.getElementById('userPhone').value;
             if (phone.length < 10) {
                 alert("Neural link failed: Please provide a valid 10-digit phone number.");
                 return;
             }
-            // Save locally for now (can be linked to Firebase later)
-            localStorage.setItem('ifs_user_auth', JSON.stringify({ phone, provider }));
-            document.getElementById('auth-overlay').style.display = 'none';
-            console.log(`User registered via ${provider} with phone: ${phone}`);
+            
+            // Switch to OTP Card
+            document.getElementById('phone-card').style.display = 'none';
+            document.getElementById('otp-card').style.display = 'block';
+            document.getElementById('otp-status').innerText = `Code sent to +91 ${phone}`;
+            
+            console.log(`OTP requested for ${phone}`);
         }
 
+        function verifyOTP() {
+            const otp = document.getElementById('otpInput').value;
+            const phone = document.getElementById('userPhone').value;
+
+            if (otp.length === 6) {
+                // Successful verification simulation
+                localStorage.setItem('ifs_user_auth', JSON.stringify({ phone, provider: 'Phone-OTP' }));
+                document.getElementById('auth-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                }, 500);
+            } else {
+                alert("NEURAL MISMATCH: Please enter the 6-digit code.");
+            }
+        }
+
+        function handleSocialAuth(provider) {
+            const phone = document.getElementById('userPhone').value;
+            if (phone.length < 10) {
+                alert("Please enter your phone number first for account linking.");
+                return;
+            }
+            localStorage.setItem('ifs_user_auth', JSON.stringify({ phone, provider }));
+            document.getElementById('auth-overlay').style.display = 'none';
+        }
+
+        /* --- SIDEBAR & HISTORY LOGIC --- */
         const sidebar = document.getElementById('sidebar');
         document.getElementById('toggle-btn').addEventListener('click', () => {
             sidebar.classList.toggle('closed');
