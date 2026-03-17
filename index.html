@@ -13,6 +13,8 @@
             --text-main: #ffffff;
             --text-sub: #b0bec5;
             --font-stack: 'SF Pro Display', sans-serif;
+            /* New Gradient for Dropdowns */
+            --gradient-fade: linear-gradient(90deg, #ff3d00, #00e5ff);
         }
 
         body {
@@ -25,7 +27,7 @@
             overflow-x: hidden;
         }
 
-        /* NEW: DYNAMIC FIRE BACKGROUND (ORANGE & BLUE) */
+        /* DYNAMIC FIRE BACKGROUND */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
@@ -84,7 +86,6 @@
             box-shadow: 0 0 20px var(--accent-blue);
         }
 
-        /* LOGO DESIGN */
         .ifs-logo {
             position: absolute; top: 20px; right: 30px;
             font-size: 45px; font-weight: bold;
@@ -96,7 +97,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* MAIN PANEL */
         #main-container {
             flex-grow: 1;
             display: flex;
@@ -150,15 +150,25 @@
         .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; text-align: left; }
         
         select, textarea {
-            width: 100%; background: rgba(13, 22, 41, 0.6);
+            width: 100%; background: rgba(13, 22, 41, 0.8);
             border: 1px solid rgba(0, 229, 255, 0.2);
             border-radius: 12px; color: #fff; padding: 14px;
             outline: none; transition: 0.3s;
         }
 
-        select:focus, textarea:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        /* FADE COLOURS FOR DROPDOWNS */
+        select option {
+            background: #020610; 
+            color: var(--accent-blue);
+            padding: 10px;
+        }
+
+        /* Custom styling for the selection look */
+        select:focus {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 15px rgba(255, 61, 0, 0.3);
+            background: linear-gradient(rgba(13, 22, 41, 0.8), rgba(13, 22, 41, 0.8)) padding-box,
+                        var(--gradient-fade) border-box;
         }
 
         textarea { height: 110px; grid-column: span 2; resize: none; }
@@ -267,7 +277,7 @@
                         <option value="Facebook Reel">Facebook Reel</option>
                         <option value="YouTube Short">YouTube Short</option>
                         <option value="YouTube Long Video">YouTube Long Video</option>
-                        <option value="Homework Help">Homework Help</option>
+                        <option value="Enormous fx Ai">Enormous fx Ai</option>
                     </select>
                 </div>
                 
