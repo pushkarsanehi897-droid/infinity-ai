@@ -13,7 +13,6 @@
             --text-main: #ffffff;
             --text-sub: #b0bec5;
             --font-stack: 'SF Pro Display', sans-serif;
-            /* New Gradient for Dropdowns */
             --gradient-fade: linear-gradient(90deg, #ff3d00, #00e5ff);
         }
 
@@ -27,7 +26,6 @@
             overflow-x: hidden;
         }
 
-        /* DYNAMIC FIRE BACKGROUND */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
@@ -46,7 +44,6 @@
             100% { filter: brightness(1) hue-rotate(-5deg); }
         }
 
-        /* SIDEBAR SYSTEM */
         #sidebar {
             width: 260px;
             background: rgba(2, 6, 16, 0.98);
@@ -156,18 +153,11 @@
             outline: none; transition: 0.3s;
         }
 
-        /* FADE COLOURS FOR DROPDOWNS */
-        select option {
-            background: #020610; 
-            color: var(--accent-blue);
-            padding: 10px;
-        }
+        select option { background: #020610; color: #00e5ff; }
 
-        /* Custom styling for the selection look */
         select:focus {
             border-color: var(--accent-red);
-            box-shadow: 0 0 15px rgba(255, 61, 0, 0.3);
-            background: linear-gradient(rgba(13, 22, 41, 0.8), rgba(13, 22, 41, 0.8)) padding-box,
+            background: linear-gradient(rgba(13, 22, 41, 0.9), rgba(13, 22, 41, 0.9)) padding-box,
                         var(--gradient-fade) border-box;
         }
 
@@ -322,19 +312,35 @@
         });
 
         const historyList = document.getElementById('historyList');
-        function saveHistory(topic, script) {
+
+        // UPDATED: Save all parameters to LocalStorage
+        function saveHistory(topic, platform, language, script) {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            h.unshift({ topic, script });
-            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 10)));
+            h.unshift({ topic, platform, language, script });
+            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 15)));
             renderH();
         }
+
         function renderH() {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            historyList.innerHTML = h.map((item, i) => `<div onclick="loadH(${i})" style="padding:10px; border-bottom:1px solid #111; font-size:11px; cursor:pointer; color: #b0bec5;">${item.topic.substring(0,20)}...</div>`).join('');
+            historyList.innerHTML = h.map((item, i) => 
+                `<div onclick="loadH(${i})" style="padding:12px; border-bottom:1px solid #111; font-size:11px; cursor:pointer; color: #b0bec5; transition: 0.2s;" onmouseover="this.style.color='#00e5ff'" onmouseout="this.style.color='#b0bec5'">
+                    <strong>${item.topic.substring(0,20)}...</strong><br>
+                    <span style="font-size:8px; opacity:0.6;">${item.platform} | ${item.language}</span>
+                </div>`).join('');
         }
+
+        // UPDATED: Restore all parameters when clicking history item
         window.loadH = (i) => {
             const h = JSON.parse(localStorage.getItem('ifs_h'));
-            document.getElementById('scriptOutput').innerText = h[i].script;
+            const item = h[i];
+            
+            document.getElementById('topicInput').value = item.topic;
+            document.getElementById('platformSelect').value = item.platform;
+            document.getElementById('languageSelect').value = item.language;
+            document.getElementById('scriptOutput').innerText = item.script;
+            
+            sidebar.classList.add('closed'); // Close sidebar after selection
         };
         renderH();
 
@@ -365,7 +371,9 @@
                 const data = await res.json();
                 const cleanText = data.script.replace(/[*#]/g, '');
                 document.getElementById('scriptOutput').innerText = cleanText;
-                saveHistory(topic, cleanText);
+                
+                // Pass all variables to history
+                saveHistory(topic, platform, language, cleanText);
             } catch (e) {
                 document.getElementById('scriptOutput').innerText = "LINK FAILURE.";
             }
