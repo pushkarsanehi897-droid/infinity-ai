@@ -24,7 +24,7 @@
             font-family: var(--font-stack);
             display: flex;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
         /* ATMOSPHERIC BACKGROUND */
@@ -46,7 +46,7 @@
             100% { filter: brightness(1) hue-rotate(-5deg); }
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR - Fixed to prevent layout shifting */
         #sidebar {
             width: 280px;
             background: rgba(1, 4, 9, 0.98);
@@ -55,13 +55,30 @@
             flex-direction: column;
             padding: 20px;
             transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            position: absolute;
+            position: fixed; /* Changed from absolute */
+            top: 0;
+            left: 0;
             height: 100%;
-            z-index: 100;
+            z-index: 1000; /* Higher z-index */
             backdrop-filter: blur(10px);
+            box-sizing: border-box;
         }
 
         #sidebar.closed { transform: translateX(-280px); }
+
+        /* OVERLAY - To dim background when archive is open */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #overlay.active { display: block; opacity: 1; }
 
         #toggle-btn {
             position: absolute; right: -65px; top: 30px;
@@ -98,7 +115,9 @@
             justify-content: center;
             align-items: center;
             padding: 40px;
-            overflow-y: auto;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
         }
 
         /* CINEMATIC CENTRAL PANEL */
@@ -120,6 +139,7 @@
             position: relative;
             overflow: hidden;
             animation: panel-entrance 1s ease-out;
+            box-sizing: border-box;
         }
 
         @keyframes panel-entrance {
@@ -260,6 +280,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
+            z-index: 5;
         }
 
         /* HISTORY STYLING */
@@ -321,36 +342,37 @@
 
         /* MOBILE RESPONSIVE QUERIES */
         @media (max-width: 600px) {
-            #main-container { padding: 15px; align-items: flex-start; }
+            #main-container { padding: 15px; display: block; overflow-y: visible; }
             
             #control-panel {
                 padding: 30px 20px;
                 border-radius: 30px;
-                margin: 60px 0 20px 0; /* Space for the logo */
+                margin: 80px 0 40px 0;
             }
 
-            h1 { font-size: 24px; letter-spacing: 6px; }
-
-            .subtitle { font-size: 10px; letter-spacing: 4px; }
-
-            .grid-layout { grid-template-columns: 1fr; gap: 20px; }
-
-            textarea { grid-column: span 1; height: 120px; }
-
-            .primary-btn { letter-spacing: 4px; padding: 15px; font-size: 14px; }
-
-            .ifs-logo { font-size: 30px; top: 15px; right: 20px; }
-
+            h1 { font-size: 26px; letter-spacing: 4px; }
+            .subtitle { font-size: 9px; letter-spacing: 3px; }
+            .grid-layout { grid-template-columns: 1fr; gap: 15px; margin: 30px 0; }
+            textarea { grid-column: span 1; height: 160px; }
+            .primary-btn { letter-spacing: 4px; padding: 18px; font-size: 14px; }
+            .ifs-logo { font-size: 35px; top: 15px; right: 20px; }
             #toggle-btn { right: -55px; top: 20px; padding: 8px 12px; }
-
-            #sidebar { width: 80%; }
+            #sidebar { width: 85%; } 
             
-            .creator-tag { font-size: 8px; letter-spacing: 2px; bottom: 10px; right: 10px; }
+            .creator-tag { 
+                position: relative; 
+                bottom: 0; right: 0; 
+                text-align: center; 
+                margin: 20px 0; 
+                width: 100%; 
+                display: block; 
+            }
         }
 
     </style>
 </head>
 <body>
+    <div id="overlay"></div>
     <div id="sidebar" class="closed">
         <button id="toggle-btn">ARCHIVE</button>
         <div style="color: var(--accent-blue); letter-spacing: 4px; font-size: 12px; margin-bottom: 25px; margin-top: 50px; font-weight: bold;">NEURAL MEMORY</div>
@@ -429,8 +451,20 @@
 
     <script>
         const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
         document.getElementById('toggle-btn').addEventListener('click', () => {
-            sidebar.classList.toggle('closed');
+            const isClosed = sidebar.classList.toggle('closed');
+            if (!isClosed) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('closed');
+            overlay.classList.remove('active');
         });
 
         const historyList = document.getElementById('historyList');
@@ -463,6 +497,7 @@
             document.getElementById('scriptOutput').innerText = item.script;
             
             sidebar.classList.add('closed');
+            overlay.classList.remove('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         renderH();
