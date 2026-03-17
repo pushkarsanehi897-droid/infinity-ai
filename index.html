@@ -89,23 +89,22 @@
         #main-container {
             flex-grow: 1;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Changed for vertical drop-down logic */
             align-items: center;
             padding: 40px;
-            overflow-y: auto; /* Allows the whole page to scroll if the tab grows large */
+            overflow-y: auto; 
         }
 
         #control-panel {
             background-color: var(--panel-bg);
             border: 1px solid rgba(0, 229, 255, 0.15);
             border-radius: 24px;
-            padding: 50px;
+            padding: 40px;
             width: 100%;
             max-width: 800px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
-            margin-top: 50px;
-            margin-bottom: 50px;
+            margin-bottom: 20px; /* Space for the next drop-down */
         }
 
         /* Title Styling */
@@ -171,33 +170,48 @@
             box-shadow: 0 0 25px var(--accent-blue);
         }
 
-        /* UPDATED NEURAL OUTPUT SECTION: This now drops down and fills more space */
+        /* NEW SUMMARY DROP-DOWN CONTAINER (SECTION 2) */
+        #summary-drop-down {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(13, 22, 41, 0.85);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 50px;
+        }
+
+        .summary-header {
+            padding: 15px 25px;
+            background: rgba(0, 229, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         #output-tab {
-            margin-top: 20px; 
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 12px; 
-            padding: 20px; 
-            min-height: 120px;
-            max-height: 50vh; /* Drops down to cover half the screen height */
+            padding: 25px; 
+            min-height: 200px;
+            max-height: 55vh; /* Covers more than half screen */
             overflow-y: auto; 
-            transition: all 0.5s ease-in-out; /* Smooth dropdown animation */
+            transition: all 0.5s ease-in-out;
             text-align: left;
         }
 
         #scriptOutput {
             font-family: 'Courier New', monospace; 
             color: #00e5ff; 
-            font-size: 13px;
+            font-size: 14px;
+            line-height: 1.6;
             white-space: pre-wrap;
         }
 
-        /* Neon Scrollbar */
         #output-tab::-webkit-scrollbar { width: 8px; }
-        #output-tab::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
         #output-tab::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
 
-        /* Copy Button */
         .copy-btn {
             background: none;
             border: 1px solid rgba(0, 229, 255, 0.4);
@@ -208,9 +222,6 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.3s;
-            float: right;
-            margin-bottom: 10px;
         }
 
         .copy-btn:hover { background: var(--accent-blue); color: #000; }
@@ -258,13 +269,15 @@
             <button class="primary-btn" id="synthesize-btn">
                 Go Infinity <span class="infinity-symbol" style="font-size: 22px;">∞</span>
             </button>
+        </div>
 
-            <div id="neural-section" style="text-align: left;">
-                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); display: inline-block; margin-top: 30px;">NEURAL OUTPUT</label>
+        <div id="summary-drop-down">
+            <div class="summary-header">
+                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); text-transform: uppercase;">Neural Summary Output</label>
                 <button class="copy-btn" id="copy-btn">Copy Script</button>
-                <div id="output-tab">
-                    <div id="scriptOutput">Welcome to Infinity studio made by Pushkar Sanehi</div>
-                </div>
+            </div>
+            <div id="output-tab">
+                <div id="scriptOutput">Welcome to Infinity studio made by Pushkar Sanehi</div>
             </div>
         </div>
 
@@ -278,23 +291,34 @@
         });
 
         const historyList = document.getElementById('historyList');
-        function saveHistory(topic, script) {
+
+        // UPDATED: Now saves parameters for prompt syncing
+        function saveHistory(topic, script, platform, language) {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            h.unshift({ topic, script });
-            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 10)));
+            h.unshift({ topic, script, platform, language });
+            localStorage.setItem('ifs_h', JSON.stringify(h.slice(0, 15)));
             renderH();
         }
+
         function renderH() {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
-            historyList.innerHTML = h.map((item, i) => `<div onclick="loadH(${i})" style="padding:10px; border-bottom:1px solid #111; font-size:11px; cursor:pointer;">${item.topic.substring(0,20)}...</div>`).join('');
+            historyList.innerHTML = h.map((item, i) => 
+                `<div onclick="loadH(${i})" style="padding:12px; border-bottom:1px solid rgba(0,229,255,0.1); font-size:11px; cursor:pointer;">${item.topic.substring(0,25)}...</div>`
+            ).join('');
         }
+
+        // UPDATED: Syncs topic, platform, and language when loading history
         window.loadH = (i) => {
             const h = JSON.parse(localStorage.getItem('ifs_h'));
-            document.getElementById('scriptOutput').innerText = h[i].script;
+            const data = h[i];
+            document.getElementById('topicInput').value = data.topic;
+            document.getElementById('platformSelect').value = data.platform;
+            document.getElementById('languageSelect').value = data.language;
+            document.getElementById('scriptOutput').innerText = data.script;
         };
+
         renderH();
 
-        // Copy Function
         document.getElementById('copy-btn').addEventListener('click', () => {
             const text = document.getElementById('scriptOutput').innerText;
             navigator.clipboard.writeText(text).then(() => {
@@ -320,12 +344,10 @@
                     body: JSON.stringify({ topic, platform, language }),
                 });
                 const data = await res.json();
-                
-                // Clean the output (No # or *)
                 const cleanText = data.script.replace(/[*#]/g, '');
 
                 document.getElementById('scriptOutput').innerText = cleanText;
-                saveHistory(topic, cleanText);
+                saveHistory(topic, cleanText, platform, language);
             } catch (e) {
                 document.getElementById('scriptOutput').innerText = "LINK FAILURE.";
             }
