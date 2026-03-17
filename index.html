@@ -14,7 +14,6 @@
             --text-sub: #b0bec5;
             --font-stack: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --cinematic-gradient: linear-gradient(135deg, rgba(255, 61, 0, 0.12) 0%, rgba(5, 10, 21, 1) 50%, rgba(0, 229, 255, 0.12) 100%);
-            --gradient-fade: linear-gradient(90deg, #ff3d00, #00e5ff);
         }
 
         body {
@@ -48,39 +47,41 @@
 
         /* SIDEBAR */
         #sidebar {
-            width: 260px;
+            width: 280px;
             background: rgba(1, 4, 9, 0.98);
             border-right: 1px solid rgba(0, 229, 255, 0.2);
             display: flex;
             flex-direction: column;
             padding: 20px;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
             position: absolute;
             height: 100%;
             z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
-        #sidebar.closed { transform: translateX(-260px); }
+        #sidebar.closed { transform: translateX(-280px); }
 
         #toggle-btn {
-            position: absolute; right: -65px; top: 30px;
+            position: absolute; right: -75px; top: 30px;
             background: #0d1629;
             border: 1px solid var(--accent-blue);
             color: var(--accent-blue);
-            cursor: pointer; padding: 8px 12px;
-            border-radius: 0 4px 4px 0; font-size: 10px;
+            cursor: pointer; padding: 10px 15px;
+            border-radius: 0 8px 8px 0; font-size: 10px;
             letter-spacing: 2px; font-weight: bold;
             text-transform: uppercase;
-            box-shadow: 5px 0 15px rgba(0, 229, 255, 0.2);
+            box-shadow: 10px 0 20px rgba(0, 0, 0, 0.5);
             transition: 0.3s;
         }
 
-        #toggle-btn:hover { color: #000; background: var(--accent-blue); box-shadow: 0 0 20px var(--accent-blue); }
+        #toggle-btn:hover { color: #fff; background: var(--accent-orange); border-color: var(--accent-orange); box-shadow: 0 0 20px var(--accent-orange); }
 
         .ifs-logo {
             position: absolute; top: 20px; right: 30px;
             font-size: 45px; font-weight: bold;
             filter: drop-shadow(0 0 15px var(--accent-orange));
+            cursor: pointer;
         }
 
         .infinity-symbol {
@@ -103,137 +104,172 @@
             background: var(--cinematic-gradient);
             background-color: var(--panel-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 32px;
-            padding: 55px;
+            border-radius: 40px;
+            padding: 60px;
             width: 100%;
-            max-width: 850px;
+            max-width: 900px;
             box-shadow: 
-                0 20px 80px rgba(0, 0, 0, 0.8),
-                inset 0 0 40px rgba(255, 61, 0, 0.05),
-                inset 0 0 40px rgba(0, 229, 255, 0.05);
+                0 30px 100px rgba(0, 0, 0, 0.9),
+                inset 0 0 50px rgba(255, 61, 0, 0.05),
+                inset 0 0 50px rgba(0, 229, 255, 0.05);
             text-align: center;
             margin: 50px 0;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
             position: relative;
             overflow: hidden;
+            animation: panel-entrance 1s ease-out;
         }
 
-        /* RIM LIGHTING TOP BORDER */
+        @keyframes panel-entrance {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         #control-panel::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
             background: linear-gradient(90deg, transparent, var(--accent-orange), var(--accent-blue), transparent);
-            opacity: 0.6;
+            opacity: 0.8;
         }
 
         h1 {
-            margin: 0; letter-spacing: 10px; text-transform: uppercase;
-            font-size: 32px; font-weight: bold;
+            margin: 0; letter-spacing: 12px; text-transform: uppercase;
+            font-size: 36px; font-weight: 900;
             background: linear-gradient(to right, #fff, var(--accent-orange), var(--accent-blue), #fff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.3));
+            filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4));
             animation: fire-pulse 4s infinite linear;
         }
 
         .subtitle {
-            font-size: 11px; letter-spacing: 5px; color: var(--text-sub);
-            text-transform: uppercase; margin-top: 8px; font-weight: 300;
+            font-size: 11px; letter-spacing: 6px; color: var(--text-sub);
+            text-transform: uppercase; margin-top: 10px; font-weight: 300;
+            opacity: 0.7;
         }
 
         @keyframes fire-pulse {
             0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(0, 229, 255, 0.4)); }
-            50% { filter: brightness(1.3) drop-shadow(0 0 20px rgba(255, 61, 0, 0.6)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 25px rgba(255, 61, 0, 0.7)); }
         }
 
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 35px 0; text-align: left; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 40px 0; text-align: left; }
         
         select, textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.4);
+            width: 100%; background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px; color: #fff; padding: 16px;
-            outline: none; transition: 0.4s;
+            border-radius: 18px; color: #fff; padding: 18px;
+            outline: none; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
         }
 
-        select option { background: #020610; color: #00e5ff; }
+        select option { background: #020610; color: #fff; }
 
         select:focus, textarea:focus {
             border-color: var(--accent-blue);
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.15);
         }
 
         textarea { 
-            height: 120px; grid-column: span 2; resize: none; 
-            border-left: 2px solid var(--accent-orange);
+            height: 140px; grid-column: span 2; resize: none; 
+            border-left: 3px solid var(--accent-orange);
+            line-height: 1.6;
         }
 
         .primary-btn {
             width: 100%; background: transparent;
             border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 18px;
-            border-radius: 14px; text-transform: uppercase;
-            letter-spacing: 5px; cursor: pointer;
-            transition: 0.4s; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
+            color: var(--accent-blue); padding: 20px;
+            border-radius: 18px; text-transform: uppercase;
+            letter-spacing: 7px; cursor: pointer;
+            transition: 0.5s; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            position: relative; overflow: hidden;
         }
+
+        .primary-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .primary-btn:hover::after { left: 100%; }
 
         .primary-btn:hover {
             background: var(--accent-blue); color: #000;
-            box-shadow: 0 0 35px var(--accent-blue);
-            transform: translateY(-2px);
+            box-shadow: 0 0 50px var(--accent-blue);
+            transform: translateY(-3px);
         }
 
         /* OUTPUT SECTION */
         #summary-page {
-            margin-top: 45px; border-radius: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 50px; border-radius: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             overflow: hidden;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
         }
 
         .summary-header {
-            padding: 15px 25px; background: rgba(255, 255, 255, 0.02);
+            padding: 18px 30px; background: rgba(255, 255, 255, 0.03);
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        #output-tab { padding: 30px; min-height: 130px; max-height: 50vh; overflow-y: auto; text-align: left; }
+        #output-tab { padding: 35px; min-height: 150px; max-height: 50vh; overflow-y: auto; text-align: left; }
 
         #scriptOutput {
             font-family: 'Courier New', monospace; 
             color: var(--accent-blue); 
-            font-size: 14px; white-space: pre-wrap; line-height: 1.7;
+            font-size: 15px; white-space: pre-wrap; line-height: 1.8;
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.2);
         }
 
-        #output-tab::-webkit-scrollbar { width: 6px; }
+        #output-tab::-webkit-scrollbar { width: 8px; }
         #output-tab::-webkit-scrollbar-thumb { background: var(--accent-orange); border-radius: 10px; }
 
         .copy-btn {
-            background: none; border: 1px solid rgba(0, 229, 255, 0.4);
-            color: var(--accent-blue); padding: 6px 16px;
-            border-radius: 8px; font-size: 9px; letter-spacing: 2px;
+            background: transparent; border: 1px solid rgba(0, 229, 255, 0.5);
+            color: var(--accent-blue); padding: 8px 20px;
+            border-radius: 10px; font-size: 10px; letter-spacing: 2px;
             text-transform: uppercase; cursor: pointer; transition: 0.3s;
         }
 
-        .copy-btn:hover { background: var(--accent-blue); color: #000; }
+        .copy-btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 15px var(--accent-blue); }
 
         .creator-tag {
-            position: fixed; bottom: 20px; right: 20px;
-            font-size: 9px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.2);
+            position: fixed; bottom: 25px; right: 25px;
+            font-size: 10px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
         }
+
+        /* HISTORY STYLING */
+        .history-item {
+            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            font-size: 12px; cursor: pointer; color: #b0bec5; 
+            transition: 0.4s; position: relative;
+        }
+        .history-item:hover {
+            background: rgba(0, 229, 255, 0.05);
+            color: var(--accent-blue);
+            padding-left: 25px;
+        }
+        .history-item::before {
+            content: '>'; position: absolute; left: 10px; opacity: 0; transition: 0.3s;
+        }
+        .history-item:hover::before { opacity: 1; left: 15px; }
     </style>
 </head>
 <body>
     <div id="sidebar" class="closed">
         <button id="toggle-btn">ARCHIVE</button>
-        <div style="color: var(--accent-blue); letter-spacing: 3px; font-size: 11px; margin-bottom: 20px; margin-top: 40px;">NEURAL MEMORY</div>
+        <div style="color: var(--accent-blue); letter-spacing: 4px; font-size: 12px; margin-bottom: 25px; margin-top: 50px; font-weight: bold;">NEURAL MEMORY</div>
         <div id="historyList" style="flex-grow:1; overflow-y:auto;"></div>
-        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:rgba(255,61,0,0.4); cursor:pointer; font-size:9px; padding: 20px;">WIPE CACHE</button>
+        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:rgba(255,61,0,0.5); cursor:pointer; font-size:10px; padding: 25px; letter-spacing: 2px; text-transform: uppercase;">WIPE SYSTEM CACHE</button>
     </div>
 
     <div id="main-container">
-        <div class="ifs-logo"><span class="infinity-symbol">∞</span></div>
+        <div class="ifs-logo" onclick="location.reload()"><span class="infinity-symbol">∞</span></div>
 
         <div id="control-panel">
             <h1>Infinity Studios</h1>
@@ -241,7 +277,7 @@
             
             <div class="grid-layout">
                 <div class="input-group">
-                    <label style="font-size: 8px; color: var(--accent-orange); letter-spacing: 2px; margin-bottom: 8px; display: block;">TARGET PLATFORM</label>
+                    <label style="font-size: 9px; color: var(--accent-orange); letter-spacing: 3px; margin-bottom: 10px; display: block; font-weight: bold;">TARGET PLATFORM</label>
                     <select id="platformSelect">
                         <option value="Instagram Reel">Instagram Reel</option>
                         <option value="Facebook Reel">Facebook Reel</option>
@@ -252,7 +288,7 @@
                 </div>
                 
                 <div class="input-group">
-                    <label style="font-size: 8px; color: var(--accent-blue); letter-spacing: 2px; margin-bottom: 8px; display: block;">FLOW LANGUAGE</label>
+                    <label style="font-size: 9px; color: var(--accent-blue); letter-spacing: 3px; margin-bottom: 10px; display: block; font-weight: bold;">FLOW LANGUAGE</label>
                     <select id="languageSelect">
                         <option value="Hindi">Hindi (हिंदी)</option>
                         <option value="English">English</option>
@@ -268,12 +304,12 @@
             </div>
 
             <button class="primary-btn" id="synthesize-btn">
-                Go Infinity <span class="infinity-symbol" style="font-size: 22px;">∞</span>
+                Go Infinity <span class="infinity-symbol" style="font-size: 26px;">∞</span>
             </button>
 
             <div id="summary-page">
                 <div class="summary-header">
-                    <span style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue);">NEURAL SUMMARY OUTPUT</span>
+                    <span style="font-size: 10px; letter-spacing: 3px; color: var(--accent-blue); font-weight: bold;">NEURAL SUMMARY OUTPUT</span>
                     <button class="copy-btn" id="copy-btn">Copy Script</button>
                 </div>
                 <div id="output-tab">
@@ -303,9 +339,11 @@
         function renderH() {
             const h = JSON.parse(localStorage.getItem('ifs_h') || '[]');
             historyList.innerHTML = h.map((item, i) => 
-                `<div onclick="loadH(${i})" style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.03); font-size:11px; cursor:pointer; color: #b0bec5; transition: 0.3s;" onmouseover="this.style.color='#00e5ff'" onmouseout="this.style.color='#b0bec5'">
-                    <strong>${item.topic.substring(0,22)}...</strong><br>
-                    <span style="font-size:8px; opacity:0.5; color:var(--accent-orange);">${item.platform}</span> | <span style="font-size:8px; opacity:0.5;">${item.language}</span>
+                `<div onclick="loadH(${i})" class="history-item">
+                    <strong style="display:block; margin-bottom: 5px; color: #fff;">${item.topic.substring(0,25)}...</strong>
+                    <span style="font-size:9px; opacity:0.6; color:var(--accent-orange); text-transform: uppercase;">${item.platform}</span> 
+                    <span style="font-size:9px; opacity:0.4; margin: 0 5px;">|</span>
+                    <span style="font-size:9px; opacity:0.6;">${item.language}</span>
                 </div>`).join('');
         }
 
@@ -319,6 +357,7 @@
             document.getElementById('scriptOutput').innerText = item.script;
             
             sidebar.classList.add('closed');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         renderH();
 
@@ -328,7 +367,13 @@
                 const btn = document.getElementById('copy-btn');
                 const originalText = btn.innerText;
                 btn.innerText = "COPIED!";
-                setTimeout(() => { btn.innerText = originalText; }, 2000);
+                btn.style.borderColor = "var(--accent-orange)";
+                btn.style.color = "var(--accent-orange)";
+                setTimeout(() => { 
+                    btn.innerText = originalText;
+                    btn.style.borderColor = "rgba(0, 229, 255, 0.5)";
+                    btn.style.color = "var(--accent-blue)";
+                }, 2000);
             });
         });
 
@@ -338,7 +383,15 @@
             const language = document.getElementById('languageSelect').value;
             if (!topic) return;
 
-            document.getElementById('scriptOutput').innerText = "INITIATING FLOW...";
+            const output = document.getElementById('scriptOutput');
+            output.innerText = "CONNECTING TO NEURAL NETWORK...";
+            
+            // Subtle loading animation effect
+            let dots = 0;
+            const loader = setInterval(() => {
+                dots = (dots + 1) % 4;
+                output.innerText = "INITIATING FLOW" + ".".repeat(dots);
+            }, 300);
 
             try {
                 const res = await fetch('https://infinity-ai-1.onrender.com/generate', { 
@@ -346,13 +399,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ topic, platform, language }),
                 });
+                clearInterval(loader);
+                
                 const data = await res.json();
                 const cleanText = data.script.replace(/[*#]/g, '');
-                document.getElementById('scriptOutput').innerText = cleanText;
+                output.innerText = cleanText;
                 
                 saveHistory(topic, platform, language, cleanText);
             } catch (e) {
-                document.getElementById('scriptOutput').innerText = "LINK FAILURE.";
+                clearInterval(loader);
+                output.innerText = "CRITICAL LINK FAILURE. CHECK CONNECTION.";
+                output.style.color = "var(--accent-orange)";
             }
         });
     </script>
