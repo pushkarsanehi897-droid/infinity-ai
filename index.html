@@ -142,9 +142,20 @@
         }
 
         .subtitle {
-            font-size: 11px; letter-spacing: 6px; color: var(--text-sub);
-            text-transform: uppercase; margin-top: 10px; font-weight: 300;
-            opacity: 0.7;
+            font-size: 13px;
+            letter-spacing: 8px;
+            color: var(--text-main);
+            text-transform: uppercase;
+            margin-top: 12px;
+            font-weight: 200;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            animation: subtitle-glow 3s infinite alternate;
+        }
+
+        @keyframes subtitle-glow {
+            from { text-shadow: 0 0 5px var(--accent-blue); }
+            to { text-shadow: 0 0 15px var(--accent-orange); }
         }
 
         @keyframes fire-pulse {
@@ -239,8 +250,13 @@
 
         .creator-tag {
             position: fixed; bottom: 25px; right: 25px;
-            font-size: 10px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.3);
+            font-size: 11px; letter-spacing: 4px; 
             font-weight: bold;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
         }
 
         /* HISTORY STYLING */
@@ -386,7 +402,6 @@
             const output = document.getElementById('scriptOutput');
             output.innerText = "CONNECTING TO NEURAL NETWORK...";
             
-            // Subtle loading animation effect
             let dots = 0;
             const loader = setInterval(() => {
                 dots = (dots + 1) % 4;
