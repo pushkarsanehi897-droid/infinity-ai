@@ -27,39 +27,6 @@
             overflow-x: hidden;
         }
 
-        /* --- NEW: PROFESSIONAL AUTH SHIELD STYLES --- */
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(1, 4, 9, 0.98);
-            z-index: 2000; display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(20px);
-            transition: opacity 0.5s ease;
-        }
-        .auth-card {
-            background: var(--cinematic-gradient);
-            background-color: var(--panel-bg);
-            padding: 40px; border-radius: 30px; border: 1px solid rgba(0, 229, 255, 0.3);
-            text-align: center; max-width: 400px; width: 85%;
-            box-shadow: 0 0 100px rgba(0,0,0,1);
-        }
-        .auth-input {
-            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 229, 255, 0.3);
-            color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px;
-            font-family: inherit; box-sizing: border-box; outline: none;
-            transition: 0.3s;
-        }
-        .auth-input:focus { border-color: var(--accent-orange); box-shadow: 0 0 15px rgba(255, 61, 0, 0.2); }
-
-        .auth-btn {
-            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-weight: bold; transition: 0.3s; font-family: inherit;
-        }
-        .google-btn { background: #fff; color: #000; }
-        .ms-btn { background: #2f2f2f; color: #fff; }
-        .google-btn:hover { background: #e6e6e6; transform: scale(1.02); }
-
         /* ATMOSPHERIC BACKGROUND */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -350,71 +317,9 @@
         .social-link.wa:hover { color: var(--accent-green); filter: drop-shadow(0 0 10px var(--accent-green)); }
         .social-link.fb:hover { color: #1877F2; filter: drop-shadow(0 0 10px #1877F2); }
 
-        /* --- NEW: MOBILE RESPONSIVENESS PATCH --- */
-        @media (max-width: 768px) {
-            #sidebar { 
-                width: 100%; height: auto; bottom: 0; top: auto;
-                border-right: none; border-top: 1px solid rgba(0, 229, 255, 0.2);
-                transform: translateY(100%);
-            }
-            #sidebar.closed { transform: translateY(100%); }
-            #sidebar:not(.closed) { transform: translateY(0); }
-            
-            #toggle-btn {
-                right: 20px; top: -50px; border-radius: 8px 8px 0 0;
-                width: 120px; text-align: center;
-            }
-
-            .grid-layout { grid-template-columns: 1fr; gap: 15px; }
-            textarea { grid-column: span 1; }
-            #control-panel { padding: 30px 20px; border-radius: 25px; }
-            h1 { font-size: 22px; letter-spacing: 4px; }
-            .subtitle { font-size: 10px; letter-spacing: 3px; }
-            
-            #main-container { padding: 20px; }
-        }
-
     </style>
 </head>
 <body>
-
-    <div id="auth-overlay">
-        <div class="auth-card" id="phone-card">
-            <div class="infinity-symbol" style="font-size: 50px; margin-bottom: 15px;">∞</div>
-            <h2 style="letter-spacing: 5px; font-size: 18px;">SECURE ACCESS</h2>
-            <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 25px; letter-spacing: 1px;">Join the Neural Network to start creating.</p>
-            
-            <input type="tel" id="userPhone" class="auth-input" placeholder="+91 Phone Number" maxlength="10">
-            
-            <button class="primary-btn" style="padding: 15px; font-size: 12px; margin-bottom: 15px;" onclick="requestOTP()">
-                GET NEURAL CODE
-            </button>
-
-            <div style="display: flex; gap: 10px;">
-                <button class="auth-btn google-btn" style="font-size: 10px;" onclick="handleSocialAuth('Google')">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="14"> Google
-                </button>
-                <button class="auth-btn ms-btn" style="font-size: 10px;" onclick="handleSocialAuth('Microsoft')">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="14"> Microsoft
-                </button>
-            </div>
-        </div>
-
-        <div class="auth-card" id="otp-card" style="display: none;">
-            <div class="infinity-symbol" style="font-size: 50px; margin-bottom: 15px;">∞</div>
-            <h2 style="letter-spacing: 5px; font-size: 18px;">VERIFY LINK</h2>
-            <p id="otp-status" style="font-size: 11px; color: var(--text-sub); margin-bottom: 25px; letter-spacing: 1px;"></p>
-            
-            <input type="text" id="otpInput" class="auth-input" placeholder="000000" maxlength="6" style="text-align: center; letter-spacing: 12px; font-size: 22px;">
-            
-            <button class="primary-btn" style="padding: 15px; font-size: 12px;" onclick="verifyOTP()">
-                VALIDATE FLOW
-            </button>
-            
-            <p onclick="location.reload()" style="font-size: 9px; color: var(--accent-orange); cursor: pointer; margin-top: 20px; letter-spacing: 2px;">BACK TO PHONE</p>
-        </div>
-    </div>
-
     <div id="sidebar" class="closed">
         <button id="toggle-btn">ARCHIVE</button>
         <div style="color: var(--accent-blue); letter-spacing: 4px; font-size: 12px; margin-bottom: 25px; margin-top: 50px; font-weight: bold;">NEURAL MEMORY</div>
@@ -492,55 +397,6 @@
     </div>
 
     <script>
-        /* --- UPDATED: OTP & AUTH LOGIC --- */
-        window.onload = function() {
-            if (localStorage.getItem('ifs_user_auth')) {
-                document.getElementById('auth-overlay').style.display = 'none';
-            }
-        };
-
-        function requestOTP() {
-            const phone = document.getElementById('userPhone').value;
-            if (phone.length < 10) {
-                alert("Neural link failed: Please provide a valid 10-digit phone number.");
-                return;
-            }
-            
-            // Switch to OTP Card
-            document.getElementById('phone-card').style.display = 'none';
-            document.getElementById('otp-card').style.display = 'block';
-            document.getElementById('otp-status').innerText = `Code sent to +91 ${phone}`;
-            
-            console.log(`OTP requested for ${phone}`);
-        }
-
-        function verifyOTP() {
-            const otp = document.getElementById('otpInput').value;
-            const phone = document.getElementById('userPhone').value;
-
-            if (otp.length === 6) {
-                // Successful verification simulation
-                localStorage.setItem('ifs_user_auth', JSON.stringify({ phone, provider: 'Phone-OTP' }));
-                document.getElementById('auth-overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('auth-overlay').style.display = 'none';
-                }, 500);
-            } else {
-                alert("NEURAL MISMATCH: Please enter the 6-digit code.");
-            }
-        }
-
-        function handleSocialAuth(provider) {
-            const phone = document.getElementById('userPhone').value;
-            if (phone.length < 10) {
-                alert("Please enter your phone number first for account linking.");
-                return;
-            }
-            localStorage.setItem('ifs_user_auth', JSON.stringify({ phone, provider }));
-            document.getElementById('auth-overlay').style.display = 'none';
-        }
-
-        /* --- SIDEBAR & HISTORY LOGIC --- */
         const sidebar = document.getElementById('sidebar');
         document.getElementById('toggle-btn').addEventListener('click', () => {
             sidebar.classList.toggle('closed');
