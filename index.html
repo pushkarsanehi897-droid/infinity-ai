@@ -92,6 +92,7 @@
             justify-content: center;
             align-items: center;
             padding: 40px;
+            overflow-y: auto; /* Allows the whole page to scroll if the tab grows large */
         }
 
         #control-panel {
@@ -103,9 +104,11 @@
             max-width: 800px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
         }
 
-        /* Blue & Red Fire Title */
+        /* Title Styling */
         h1 {
             margin: 0;
             letter-spacing: 8px;
@@ -168,47 +171,52 @@
             box-shadow: 0 0 25px var(--accent-blue);
         }
 
-        .btn-infinity {
-            font-size: 20px;
-            background: linear-gradient(45deg, #000, #ff3d00);
-            -webkit-background-clip: text;
-        }
-        .primary-btn:hover .btn-infinity {
-            -webkit-text-fill-color: #000;
-        }
-
-        /* UPDATED OUTPUT BOX: Scrolling and line breaks */
-        #scriptOutput {
+        /* UPDATED NEURAL OUTPUT SECTION: This now drops down and fills more space */
+        #output-tab {
             margin-top: 20px; 
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(0, 229, 255, 0.1);
             border-radius: 12px; 
             padding: 20px; 
             min-height: 120px;
-            max-height: 300px; /* Limits the height */
-            overflow-y: auto; /* Adds the scrollbar */
+            max-height: 50vh; /* Drops down to cover half the screen height */
+            overflow-y: auto; 
+            transition: all 0.5s ease-in-out; /* Smooth dropdown animation */
+            text-align: left;
+        }
+
+        #scriptOutput {
             font-family: 'Courier New', monospace; 
             color: #00e5ff; 
             font-size: 13px;
-            text-align: left;
-            white-space: pre-wrap; /* Keeps paragraphs structured correctly */
+            white-space: pre-wrap;
         }
 
-        /* Custom Neon Scrollbar for Output Box */
-        #scriptOutput::-webkit-scrollbar {
-            width: 8px;
+        /* Neon Scrollbar */
+        #output-tab::-webkit-scrollbar { width: 8px; }
+        #output-tab::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        #output-tab::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
+
+        /* Copy Button */
+        .copy-btn {
+            background: none;
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            color: var(--accent-blue);
+            padding: 5px 15px;
+            border-radius: 6px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            float: right;
+            margin-bottom: 10px;
         }
-        #scriptOutput::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-        #scriptOutput::-webkit-scrollbar-thumb {
-            background: var(--accent-blue);
-            border-radius: 10px;
-        }
+
+        .copy-btn:hover { background: var(--accent-blue); color: #000; }
 
         .creator-tag {
-            position: absolute; bottom: 20px; right: 20px;
+            position: fixed; bottom: 20px; right: 20px;
             font-size: 9px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.2);
         }
     </style>
@@ -251,9 +259,12 @@
                 Go Infinity <span class="infinity-symbol" style="font-size: 22px;">∞</span>
             </button>
 
-            <div id="output-container" style="text-align: left;">
-                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); display: block; margin-top: 30px;">NEURAL OUTPUT</label>
-                <div id="scriptOutput">Welcome to Infinity studio made by Pushkar Sanehi</div>
+            <div id="neural-section" style="text-align: left;">
+                <label style="font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); display: inline-block; margin-top: 30px;">NEURAL OUTPUT</label>
+                <button class="copy-btn" id="copy-btn">Copy Script</button>
+                <div id="output-tab">
+                    <div id="scriptOutput">Welcome to Infinity studio made by Pushkar Sanehi</div>
+                </div>
             </div>
         </div>
 
@@ -283,6 +294,17 @@
         };
         renderH();
 
+        // Copy Function
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const text = document.getElementById('scriptOutput').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copy-btn');
+                const originalText = btn.innerText;
+                btn.innerText = "COPIED!";
+                setTimeout(() => { btn.innerText = originalText; }, 2000);
+            });
+        });
+
         document.getElementById('synthesize-btn').addEventListener('click', async () => {
             const topic = document.getElementById('topicInput').value;
             const platform = document.getElementById('platformSelect').value;
@@ -299,7 +321,7 @@
                 });
                 const data = await res.json();
                 
-                // NEW: This line removes all * and # characters before displaying
+                // Clean the output (No # or *)
                 const cleanText = data.script.replace(/[*#]/g, '');
 
                 document.getElementById('scriptOutput').innerText = cleanText;
