@@ -172,18 +172,39 @@
             font-size: 20px;
             background: linear-gradient(45deg, #000, #ff3d00);
             -webkit-background-clip: text;
-            /* When hovering, we change the symbol color to black to match the text */
         }
         .primary-btn:hover .btn-infinity {
             -webkit-text-fill-color: #000;
         }
 
+        /* UPDATED OUTPUT BOX: Scrolling and line breaks */
         #scriptOutput {
-            margin-top: 20px; background: rgba(0,0,0,0.3);
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.3);
             border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 12px; padding: 20px; min-height: 120px;
-            font-family: 'Courier New', monospace; color: #00e5ff; font-size: 13px;
+            border-radius: 12px; 
+            padding: 20px; 
+            min-height: 120px;
+            max-height: 300px; /* Limits the height */
+            overflow-y: auto; /* Adds the scrollbar */
+            font-family: 'Courier New', monospace; 
+            color: #00e5ff; 
+            font-size: 13px;
             text-align: left;
+            white-space: pre-wrap; /* Keeps paragraphs structured correctly */
+        }
+
+        /* Custom Neon Scrollbar for Output Box */
+        #scriptOutput::-webkit-scrollbar {
+            width: 8px;
+        }
+        #scriptOutput::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        #scriptOutput::-webkit-scrollbar-thumb {
+            background: var(--accent-blue);
+            border-radius: 10px;
         }
 
         .creator-tag {
@@ -277,8 +298,12 @@
                     body: JSON.stringify({ topic, platform, language }),
                 });
                 const data = await res.json();
-                document.getElementById('scriptOutput').innerText = data.script;
-                saveHistory(topic, data.script);
+                
+                // NEW: This line removes all * and # characters before displaying
+                const cleanText = data.script.replace(/[*#]/g, '');
+
+                document.getElementById('scriptOutput').innerText = cleanText;
+                saveHistory(topic, cleanText);
             } catch (e) {
                 document.getElementById('scriptOutput').innerText = "LINK FAILURE.";
             }
