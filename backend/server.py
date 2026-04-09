@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -6,18 +6,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 import uuid
-import secrets
-import base64
-import hashlib
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 import httpx
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
+import google.generativeai as genai
 from twilio.rest import Client as TwilioClient
 
 ROOT_DIR = Path(__file__).parent
@@ -62,13 +58,6 @@ class PhoneOTPRequest(BaseModel):
 class PhoneOTPVerify(BaseModel):
     phone_number: str
     code: str
-
-class ForgotPassword(BaseModel):
-    email: EmailStr
-
-class ResetPassword(BaseModel):
-    token: str
-    new_password: str
 
 class ChatRequest(BaseModel):
     message: str
@@ -199,7 +188,7 @@ async def register(user: UserCreate, response: Response):
     return {"user_id": user_id, "email": email, "name": user.name, "role": "user", "auth_method": "email"}
 
 @api_router.post("/auth/login")
-async def login(credentials: UserLogin, request: Request, response: Response):
+async def login(credentials: UserLogin, response: Response):
     email = credentials.email.lower()
     user = await db.users.find_one({"email": email})
     if not user or not user.get("password_hash"):
@@ -243,44 +232,11 @@ async def refresh_token(request: Request, response: Response):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-# ==================== GOOGLE OAUTH ====================
+# ==================== GOOGLE OAUTH (Emergent-only, will break) ====================
+# If you don't need Google login, remove or comment this endpoint.
 @api_router.get("/auth/google/session")
 async def google_session_exchange(request: Request, response: Response):
-    session_id = request.headers.get("X-Session-ID")
-    if not session_id:
-        raise HTTPException(status_code=400, detail="Missing session_id")
-    async with httpx.AsyncClient() as c:
-        auth_response = await c.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id}
-        )
-    if auth_response.status_code != 200:
-        raise HTTPException(status_code=400, detail="Failed to validate session")
-    session_data = auth_response.json()
-    user = await db.users.find_one({"email": session_data["email"]})
-    if not user:
-        user_id = f"user_{uuid.uuid4().hex[:12]}"
-        user = {
-            "user_id": user_id,
-            "email": session_data["email"],
-            "name": session_data["name"],
-            "picture": session_data.get("picture"),
-            "role": "user",
-            "auth_method": "google",
-            "created_at": datetime.now(timezone.utc)
-        }
-        await db.users.insert_one(user)
-    else:
-        user_id = user["user_id"]
-        await db.users.update_one({"user_id": user_id}, {"$set": {"name": session_data["name"], "picture": session_data.get("picture")}})
-    session_token = session_data["session_token"]
-    await db.user_sessions.update_one(
-        {"session_token": session_token},
-        {"$set": {"user_id": user_id, "session_token": session_token, "expires_at": datetime.now(timezone.utc) + timedelta(days=7), "created_at": datetime.now(timezone.utc)}},
-        upsert=True
-    )
-    response.set_cookie(key="session_token", value=session_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
-    return {"user_id": user_id, "email": session_data["email"], "name": session_data["name"], "picture": session_data.get("picture"), "role": user.get("role", "user"), "auth_method": "google"}
+    raise HTTPException(status_code=501, detail="Google OAuth not configured outside Emergent")
 
 # ==================== PHONE OTP ====================
 @api_router.post("/auth/phone/send-otp")
@@ -314,44 +270,43 @@ async def verify_phone_otp(data: PhoneOTPVerify, response: Response):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# ==================== AI CHAT ====================
+# ==================== AI CHAT (Gemini only) ====================
 @api_router.post("/ai/chat")
 async def ai_chat(data: ChatRequest, user: dict = Depends(get_current_user)):
     session_id = data.session_id or f"chat_{uuid.uuid4().hex[:12]}"
-    if data.model == "auto":
-        if len(data.message) > 500:
-            provider, model = "openai", "gpt-4o"
-            api_key = os.environ.get("EMERGENT_LLM_KEY")
-        else:
-            provider, model = "gemini", "gemini-2.0-flash"
-            api_key = os.environ.get("GEMINI_API_KEY")
-    else:
-        if ":" in data.model:
-            provider, model = data.model.split(":", 1)
-        else:
-            provider, model = "openai", "gpt-4o"
-        api_key = os.environ.get("GEMINI_API_KEY") if provider == "gemini" else os.environ.get("EMERGENT_LLM_KEY")
-
-    chat = LlmChat(api_key=api_key, session_id=session_id, system_message="You are a helpful AI assistant.").with_model(provider, model)
-    message = UserMessage(text=data.message)
-    response_text = await chat.send_message(message)
-    await db.chat_history.insert_one({
-        "user_id": user["user_id"], "session_id": session_id,
-        "message": data.message, "response": response_text,
-        "model": f"{provider}:{model}", "created_at": datetime.now(timezone.utc)
-    })
-    return {"response": response_text, "session_id": session_id, "model": f"{provider}:{model}"}
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Gemini API key not configured")
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        chat_session = model.start_chat(history=[])
+        response = await chat_session.send_message_async(data.message)
+        response_text = response.text
+        await db.chat_history.insert_one({
+            "user_id": user["user_id"],
+            "session_id": session_id,
+            "message": data.message,
+            "response": response_text,
+            "model": "gemini:gemini-2.0-flash",
+            "created_at": datetime.now(timezone.utc)
+        })
+        return {"response": response_text, "session_id": session_id, "model": "gemini:gemini-2.0-flash"}
+    except Exception as e:
+        logger.error(f"AI Chat error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI Chat failed: {str(e)}")
 
 @api_router.get("/ai/chat/history")
 async def get_chat_history(user: dict = Depends(get_current_user)):
     history = await db.chat_history.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
     return {"history": history}
 
-# ==================== AI IMAGE ====================
+# ==================== AI IMAGE (Gemini/Imagen) ====================
 @api_router.post("/ai/image")
 async def generate_image(data: ImageRequest, user: dict = Depends(get_current_user)):
-    api_key = os.environ.get("GEMINI_API_KEY")
-    session_id = f"img_{uuid.uuid4().hex[:12]}"
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Gemini API key not configured")
     style_prompts = {
         "realistic": "photorealistic, high detail, professional photography",
         "anime": "anime style, vibrant colors, manga illustration",
@@ -359,17 +314,37 @@ async def generate_image(data: ImageRequest, user: dict = Depends(get_current_us
         "futuristic": "futuristic, sci-fi, neon lights, cyberpunk aesthetic"
     }
     enhanced_prompt = f"{data.prompt}, {style_prompts.get(data.style, '')}"
-    chat = LlmChat(api_key=api_key, session_id=session_id, system_message="You are an AI image generator.").with_model("gemini", "gemini-2.0-flash-exp-image-generation").with_params(modalities=["image", "text"])
-    msg = UserMessage(text=enhanced_prompt)
     try:
-        text, images = await chat.send_message_multimodal_response(msg)
-        if images and len(images) > 0:
+        genai.configure(api_key=api_key)
+        # Using the correct Imagen method
+        model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+        result = model.generate_images(
+            prompt=enhanced_prompt,
+            number_of_images=1,
+            aspect_ratio="1:1"
+        )
+        if result.images:
+            image = result.images[0]
             image_id = f"img_{uuid.uuid4().hex[:12]}"
-            await db.image_history.insert_one({"image_id": image_id, "user_id": user["user_id"], "prompt": data.prompt, "style": data.style, "created_at": datetime.now(timezone.utc)})
-            return {"image_id": image_id, "image_data": images[0]['data'], "mime_type": images[0]['mime_type'], "prompt": data.prompt}
+            await db.image_history.insert_one({
+                "image_id": image_id,
+                "user_id": user["user_id"],
+                "prompt": data.prompt,
+                "style": data.style,
+                "created_at": datetime.now(timezone.utc)
+            })
+            import base64
+            image_data = base64.b64encode(image._image_bytes).decode('utf-8')
+            return {
+                "image_id": image_id,
+                "image_data": image_data,
+                "mime_type": "image/png",
+                "prompt": data.prompt
+            }
         else:
             raise HTTPException(status_code=500, detail="No image generated")
     except Exception as e:
+        logger.error(f"Image generation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Image generation failed: {str(e)}")
 
 @api_router.get("/ai/image/history")
@@ -377,45 +352,19 @@ async def get_image_history(user: dict = Depends(get_current_user)):
     history = await db.image_history.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
     return {"history": history}
 
-# ==================== AI VIDEO ====================
+# ==================== AI VIDEO (Placeholder) ====================
 @api_router.post("/ai/video")
 async def generate_video(data: VideoRequest, user: dict = Depends(get_current_user)):
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
-    style_prompts = {
-        "cinematic": "cinematic camera movement, dramatic lighting, film quality",
-        "animation": "animated style, smooth motion, vibrant colors",
-        "storytelling": "narrative story, emotional journey, character-driven"
-    }
-    enhanced_prompt = f"{data.prompt}, {style_prompts.get(data.style, '')}"
-    try:
-        video_gen = OpenAIVideoGeneration(api_key=api_key)
-        video_id = f"vid_{uuid.uuid4().hex[:12]}"
-        output_path = f"/tmp/{video_id}.mp4"
-        video_bytes = video_gen.text_to_video(prompt=enhanced_prompt, model="sora-2", size=data.size, duration=data.duration, max_wait_time=600)
-        if video_bytes:
-            video_gen.save_video(video_bytes, output_path)
-            await db.video_history.insert_one({"video_id": video_id, "user_id": user["user_id"], "prompt": data.prompt, "style": data.style, "duration": data.duration, "size": data.size, "file_path": output_path, "created_at": datetime.now(timezone.utc)})
-            return {"video_id": video_id, "prompt": data.prompt, "status": "completed", "download_url": f"/api/ai/video/{video_id}/download"}
-        else:
-            raise HTTPException(status_code=500, detail="Video generation failed")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+    raise HTTPException(status_code=501, detail="Video generation not implemented yet")
 
 @api_router.get("/ai/video/history")
 async def get_video_history(user: dict = Depends(get_current_user)):
-    history = await db.video_history.find({"user_id": user["user_id"]}, {"_id": 0, "file_path": 0}).sort("created_at", -1).limit(50).to_list(50)
+    history = await db.video_history.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
     return {"history": history}
 
 @api_router.get("/ai/video/{video_id}/download")
 async def download_video(video_id: str, user: dict = Depends(get_current_user)):
-    video = await db.video_history.find_one({"video_id": video_id, "user_id": user["user_id"]}, {"_id": 0})
-    if not video:
-        raise HTTPException(status_code=404, detail="Video not found")
-    from fastapi.responses import FileResponse
-    file_path = video.get("file_path")
-    if file_path and os.path.exists(file_path):
-        return FileResponse(file_path, media_type="video/mp4", filename=f"{video_id}.mp4")
-    raise HTTPException(status_code=404, detail="Video file not found")
+    raise HTTPException(status_code=501, detail="Video download not implemented")
 
 # ==================== ROOT ====================
 @api_router.get("/")
