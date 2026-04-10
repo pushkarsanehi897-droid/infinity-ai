@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [imagePrompt, setImagePrompt] = useState('');
   const [generatedImage, setGeneratedImage] = useState(null);
   const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState('realistic');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -32,14 +34,18 @@ const Dashboard = () => {
     setInput('');
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/api/chat`, {
+      const res = await fetch(`${BACKEND_URL}/api/ai/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ message: input }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ message: userMsg.content }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response || data.message || 'No response' }]);
+      if (!res.ok) {
+        setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${data.detail || 'Server error'}` }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response || 'No response' }]);
+      }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Error: Could not reach the server.' }]);
     }
@@ -50,24 +56,30 @@ const Dashboard = () => {
     if (!imagePrompt.trim()) return;
     setImageLoading(true);
     setGeneratedImage(null);
+    setImageError('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/api/generate-image`, {
+      const res = await fetch(`${BACKEND_URL}/api/ai/image`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ prompt: imagePrompt }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ prompt: imagePrompt, style: selectedStyle }),
       });
       const data = await res.json();
-      setGeneratedImage(data.image_url || data.url || null);
+      if (!res.ok) {
+        setImageError(data.detail || 'Image generation failed');
+      } else if (data.image_data) {
+        setGeneratedImage(`data:${data.mime_type};base64,${data.image_data}`);
+      }
     } catch {
-      alert('Image generation failed.');
+      setImageError('Error: Could not reach the server.');
     }
     setImageLoading(false);
   };
 
+  const styles = ['realistic', 'anime', 'cinematic', 'futuristic'];
+
   return (
     <div style={{ minHeight: '100vh', background: '#030303', color: 'white', fontFamily: 'Outfit, sans-serif', display: 'flex', flexDirection: 'column' }}>
-      {/* Navbar */}
       <nav style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '20px', fontWeight: 'bold', background: 'linear-gradient(90deg, #00F0FF, #8A2BE2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           ∞ Infinity AI
@@ -80,21 +92,20 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         {['chat', 'image'].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={{
             padding: '8px 20px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px',
             background: activeTab === tab ? 'linear-gradient(90deg, #00F0FF, #8A2BE2)' : 'rgba(255,255,255,0.07)',
-            color: 'white', textTransform: 'capitalize'
+            color: 'white',
           }}>
             {tab === 'chat' ? '💬 AI Chat' : '🎨 Image Gen'}
           </button>
         ))}
       </div>
 
-      {/* Content */}
       <div style={{ flex: 1, padding: '24px', maxWidth: '900px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+
         {activeTab === 'chat' && (
           <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 200px)' }}>
             <div style={{ flex: 1, overflowY: 'auto', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -141,6 +152,17 @@ const Dashboard = () => {
         {activeTab === 'image' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h2 style={{ color: '#8A2BE2', margin: 0 }}>🎨 AI Image Generation</h2>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {styles.map(s => (
+                <button key={s} onClick={() => setSelectedStyle(s)} style={{
+                  padding: '6px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                  background: selectedStyle === s ? 'linear-gradient(90deg, #8A2BE2, #FF5500)' : 'rgba(255,255,255,0.07)',
+                  color: 'white', textTransform: 'capitalize'
+                }}>
+                  {s}
+                </button>
+              ))}
+            </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <input
                 value={imagePrompt}
@@ -155,15 +177,20 @@ const Dashboard = () => {
                 {imageLoading ? 'Generating...' : 'Generate'}
               </button>
             </div>
+            {imageError && (
+              <div style={{ padding: '12px 16px', background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.3)', borderRadius: '8px', color: '#ff6b6b' }}>
+                ⚠️ {imageError}
+              </div>
+            )}
             {imageLoading && (
               <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(255,255,255,0.4)' }}>✨ Creating your image...</div>
             )}
             {generatedImage && (
               <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <img src={generatedImage} alt="Generated" style={{ width: '100%', display: 'block' }} />
+                <img src={generatedImage} alt="AI Generated" style={{ width: '100%', display: 'block' }} />
                 <div style={{ padding: '12px', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>{imagePrompt}</span>
-                  <a href={generatedImage} download style={{ color: '#00F0FF', fontSize: '13px' }}>Download</a>
+                  <a href={generatedImage} download="infinity-ai-image.png" style={{ color: '#00F0FF', fontSize: '13px', textDecoration: 'none' }}>⬇ Download</a>
                 </div>
               </div>
             )}
