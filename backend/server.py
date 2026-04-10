@@ -232,8 +232,7 @@ async def refresh_token(request: Request, response: Response):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-# ==================== GOOGLE OAUTH (Emergent-only, will break) ====================
-# If you don't need Google login, remove or comment this endpoint.
+# ==================== GOOGLE OAUTH (disabled outside Emergent) ====================
 @api_router.get("/auth/google/session")
 async def google_session_exchange(request: Request, response: Response):
     raise HTTPException(status_code=501, detail="Google OAuth not configured outside Emergent")
@@ -316,7 +315,6 @@ async def generate_image(data: ImageRequest, user: dict = Depends(get_current_us
     enhanced_prompt = f"{data.prompt}, {style_prompts.get(data.style, '')}"
     try:
         genai.configure(api_key=api_key)
-        # Using the correct Imagen method
         model = genai.ImageGenerationModel("imagen-3.0-generate-001")
         result = model.generate_images(
             prompt=enhanced_prompt,
@@ -352,7 +350,7 @@ async def get_image_history(user: dict = Depends(get_current_user)):
     history = await db.image_history.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
     return {"history": history}
 
-# ==================== AI VIDEO (Placeholder) ====================
+# ==================== AI VIDEO (placeholder) ====================
 @api_router.post("/ai/video")
 async def generate_video(data: VideoRequest, user: dict = Depends(get_current_user)):
     raise HTTPException(status_code=501, detail="Video generation not implemented yet")
