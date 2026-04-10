@@ -19,6 +19,9 @@ from twilio.rest import Client as TwilioClient
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
@@ -33,10 +36,18 @@ if os.getenv("TWILIO_ACCOUNT_SID") and os.getenv("TWILIO_AUTH_TOKEN"):
 app = FastAPI()
 
 app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('FRONTEND_URL', 'http://localhost:3000').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ.get("JWT_SECRET", "your-secret-key"),
     https_only=False,
-    same_site="lax",
+    same_site="none",
     max_age=86400,
 )
 
@@ -183,8 +194,8 @@ async def register(user: UserCreate, response: Response):
     })
     access_token = create_access_token(user_id, email)
     refresh_token = create_refresh_token(user_id)
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=900, path="/")
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     return {"user_id": user_id, "email": email, "name": user.name, "role": "user", "auth_method": "email"}
 
 @api_router.post("/auth/login")
@@ -197,8 +208,8 @@ async def login(credentials: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     access_token = create_access_token(user["user_id"], email)
     refresh_token = create_refresh_token(user["user_id"])
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=900, path="/")
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     return {"user_id": user["user_id"], "email": user["email"], "name": user["name"], "role": user.get("role", "user"), "auth_method": user.get("auth_method", "email")}
 
 @api_router.post("/auth/logout")
@@ -225,14 +236,13 @@ async def refresh_token(request: Request, response: Response):
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         access_token = create_access_token(user["user_id"], user["email"])
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=900, path="/")
+        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=900, path="/")
         return {"status": "success"}
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Refresh token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-# ==================== GOOGLE OAUTH (disabled outside Emergent) ====================
 @api_router.get("/auth/google/session")
 async def google_session_exchange(request: Request, response: Response):
     raise HTTPException(status_code=501, detail="Google OAuth not configured outside Emergent")
@@ -263,13 +273,13 @@ async def verify_phone_otp(data: PhoneOTPVerify, response: Response):
             await db.users.insert_one(user)
         access_token = create_access_token(user["user_id"], user.get("email", ""))
         refresh_token = create_refresh_token(user["user_id"])
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=900, path="/")
-        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=900, path="/")
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
         return {"user_id": user["user_id"], "phone_number": user["phone_number"], "name": user["name"], "role": "user", "auth_method": "phone"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# ==================== AI CHAT (Gemini only) ====================
+# ==================== AI CHAT ====================
 @api_router.post("/ai/chat")
 async def ai_chat(data: ChatRequest, user: dict = Depends(get_current_user)):
     session_id = data.session_id or f"chat_{uuid.uuid4().hex[:12]}"
@@ -300,7 +310,7 @@ async def get_chat_history(user: dict = Depends(get_current_user)):
     history = await db.chat_history.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
     return {"history": history}
 
-# ==================== AI IMAGE (Gemini/Imagen) ====================
+# ==================== AI IMAGE ====================
 @api_router.post("/ai/image")
 async def generate_image(data: ImageRequest, user: dict = Depends(get_current_user)):
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
@@ -316,11 +326,7 @@ async def generate_image(data: ImageRequest, user: dict = Depends(get_current_us
     try:
         genai.configure(api_key=api_key)
         model = genai.ImageGenerationModel("imagen-3.0-generate-001")
-        result = model.generate_images(
-            prompt=enhanced_prompt,
-            number_of_images=1,
-            aspect_ratio="1:1"
-        )
+        result = model.generate_images(prompt=enhanced_prompt, number_of_images=1, aspect_ratio="1:1")
         if result.images:
             image = result.images[0]
             image_id = f"img_{uuid.uuid4().hex[:12]}"
@@ -333,12 +339,7 @@ async def generate_image(data: ImageRequest, user: dict = Depends(get_current_us
             })
             import base64
             image_data = base64.b64encode(image._image_bytes).decode('utf-8')
-            return {
-                "image_id": image_id,
-                "image_data": image_data,
-                "mime_type": "image/png",
-                "prompt": data.prompt
-            }
+            return {"image_id": image_id, "image_data": image_data, "mime_type": "image/png", "prompt": data.prompt}
         else:
             raise HTTPException(status_code=500, detail="No image generated")
     except Exception as e:
@@ -370,17 +371,6 @@ async def root():
     return {"message": "Infinity AI Platform API"}
 
 app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('FRONTEND_URL', 'http://localhost:3000').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
